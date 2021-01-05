@@ -9,7 +9,7 @@ docker exec -it buildenv bash -c "apt update && apt -y install ca-certificates a
 docker cp ../sources.list.d/buster.list buildenv:/etc/apt/sources.list
 docker exec -it buildenv bash -c "apt update"
 
-pkgs=$(echo $(cat ../packages/*.list))
+pkgs=$(echo $(cat ../packages/*.list ../packages/build-dep/*.list))
 docker exec -it buildenv bash -c "apt -y install $pkgs"
 
 cat ../shell/*.bashrc > .bashrc
