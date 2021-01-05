@@ -1,0 +1,10 @@
+make
+gradle
+ant
+maven
+rake
+automake
+autoconf
+autotools
+ninja-build
+
