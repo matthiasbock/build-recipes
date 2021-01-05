@@ -1,0 +1,10 @@
+
+deb https://ftp.gwdg.de/pub/linux/debian/debian/ buster main contrib
+deb-src https://ftp.gwdg.de/pub/linux/debian/debian/ buster main contrib
+
+deb https://ftp.gwdg.de/pub/linux/debian/debian/ buster-backports main contrib
+deb-src https://ftp.gwdg.de/pub/linux/debian/debian/ buster-backports main contrib
+
+deb https://ftp.gwdg.de/pub/linux/debian/debian/ oldstable main contrib
+deb-src https://ftp.gwdg.de/pub/linux/debian/debian/ oldstable main contrib
+

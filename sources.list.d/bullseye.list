@@ -1,0 +1,10 @@
+
+deb https://ftp.gwdg.de/pub/linux/debian/debian/ bullseye main contrib
+deb-src https://ftp.gwdg.de/pub/linux/debian/debian/ bullseye main contrib
+
+deb https://ftp.gwdg.de/pub/linux/debian/debian/ bullseye-backports main contrib
+deb-src https://ftp.gwdg.de/pub/linux/debian/debian/ bullseye-backports main contrib
+
+deb https://ftp.gwdg.de/pub/linux/debian/debian/ oldstable main contrib
+deb-src https://ftp.gwdg.de/pub/linux/debian/debian/ oldstable main contrib
+
