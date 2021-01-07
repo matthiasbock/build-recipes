@@ -1,0 +1,11 @@
+ubuntu-cloud-keyring
+ubuntu-dbgsym-keyring
+ubuntu-keyring
+ubuntu-oem-keyring
+debian-archive-keyring
+debian-keyring
+debian-ports-archive-keyring
+emdebian-archive-keyring
+pkg-mozilla-archive-keyring
+ubuntu-cloudimage-keyring
+ubuntukylin-keyring
