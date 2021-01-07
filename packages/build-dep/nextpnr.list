@@ -1,0 +1,9 @@
+python3
+libboost-filesystem-dev
+libboost-program-options-dev
+libboost-python-dev
+libboost-iostreams-dev
+libboost-system-dev
+libboost-thread-dev
+zlib1g-dev
+
