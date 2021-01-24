@@ -6,4 +6,5 @@ libboost-iostreams-dev
 libboost-system-dev
 libboost-thread-dev
 zlib1g-dev
+libeigen3-dev
 
