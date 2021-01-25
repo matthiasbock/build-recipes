@@ -3,22 +3,39 @@
 base_image="debian:buster"
 container_name="buildenv_base"
 user="c3po"
-package_bundles="keyrings console-tools version-control build-tools c python3"
+#package_bundles="keyrings console-tools version-control build-tools c python3"
+package_bundles="keyrings console-tools version-control"
 
 common="../common"
 src_host="~/src"
 src_container="/usr/local/src"
+apt_cacher_host="172.17.0.1"
 
-#image=...
-#containers=...
+images=$(docker image ls -a)
+containers=$(docker containers ls -a)
 volumes=$(docker volume ls | awk '{ if ($2 != "VOLUME") { print $2; } }')
 
 if [ "$(echo $volumes | fgrep ccache)" == "" ]; then
-	echo "No ccache volume found. Creating ..."
+	echo "ccache volume not found. Creating ..."
 	docker volume create ccache
 	echo "Created."
-else
-	echo "Found ccache volume. Using ..."
+fi
+
+if [ "$(echo $volumes | fgrep apt-cacher)" == "" ]; then
+	echo "apt-cacher volume not found. Creating ..."
+	docker volume create apt-cacher
+	echo "Created."
+fi
+
+if [ "$(echo $images | fgrep apt-cacher)" == "" ]; then
+	echo "apt-cacher image not found. Creating ..."
+	docker run -d --name apt-cacher -p 3142:3142 -v apt-cacher:/var/cache/apt-cacher-ng mbentley/apt-cacher-ng
+	echo "Created."
+fi
+
+if [ "$(echo $containers | fgrep $container_name)" != "" ]; then
+	echo "Container already exists. Aborting."
+	exit 0
 fi
 
 #
@@ -40,9 +57,10 @@ docker cp $tmpfile $container_name:/home/$user/
 rm $tmpfile
 
 #
-# Enable package installation via APT
+# Configure/prepare APT
 #
 echo "Enabling package installation ..."
+docker exec -it $container_name bash -c "echo 'Acquire::http::Proxy \"http://$apt_cacher_host:3142\";' >> /etc/apt/apt.conf"
 docker exec -it $container_name bash -c "apt update && apt install -y apt-utils dialog ca-certificates apt-transport-https"
 docker cp $common/sources.list.d/buster.list $container_name:/etc/apt/sources.list
 docker exec -it $container_name bash -c "apt update"
