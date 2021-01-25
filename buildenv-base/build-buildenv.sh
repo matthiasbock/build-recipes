@@ -43,7 +43,7 @@ rm $tmpfile
 # Enable package installation via APT
 #
 echo "Enabling package installation ..."
-docker exec -it $container_name bash -c "apt update && apt install -y ca-certificates apt-transport-https"
+docker exec -it $container_name bash -c "apt update && apt install -y apt-utils dialog ca-certificates apt-transport-https"
 docker cp $common/sources.list.d/buster.list $container_name:/etc/apt/sources.list
 docker exec -it $container_name bash -c "apt update"
 
@@ -59,8 +59,11 @@ pkgs=$(echo -n $pkgs | sed -e "s/  / /g")
 #echo $pkgs
 echo "Installing $(echo -n $pkgs | wc -w) additional packages ..."
 if [ "$pkgs" != "" ]; then
-	docker exec -it $container_name apt install -y --ignore-missing $pkgs
+	for pkg in $pkgs; do
+		docker exec -it $container_name apt install -y $pkg
+	done
 fi
+docker exec -it $container_name apt clean
 
 # Done.
 echo "Successfully created container $container_name."
