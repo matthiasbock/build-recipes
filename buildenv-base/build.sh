@@ -3,8 +3,10 @@
 set -e
 cd "$(dirname $0)"
 
+source conf.sh
+
 base_image="debian:buster-slim"
-container_name="buildenv_base"
+container_name=$buildenv_base_container
 user="c3po"
 #package_bundles="keyrings console-tools version-control build-tools c python3"
 package_bundles="keyrings console-tools version-control"
@@ -18,29 +20,29 @@ source ../apt-cache/conf.sh
 
 source ../common/docker.sh
 
-if [ "$(echo $volumes | fgrep ccache)" == "" ]; then
-	echo "ccache volume not found. Creating ..."
-	docker volume create ccache
-	echo "Created."
-fi
+create_volume ccache
 
-if [ "$(echo $containers | fgrep $container_name)" != "" ]; then
-	echo "Container already exists. Aborting."
+echo -n "Creating container '$container_name' ... "
+if container_exists $container_name; then
+	echo "already exists. Skipping."
 	exit 0
 fi
+echo
 
 #
 # Create the container
 #
-echo "Creating container $container_name ..."
-docker create -it \
-	--name $container_name \
-	--net $net \
-	--network-alias $container_name \
-	-v $src_hots:$src_container \
-	-v ccache:/home/$user/.ccache \
-	$base_image
-
+function constructor()
+{
+	docker create -it \
+		--name $container_name \
+		--net $net \
+		--network-alias $container_name \
+		-v $src_hots:$src_container \
+		-v ccache:/home/$user/.ccache \
+		$base_image
+}
+create_container $container_name constructor
 docker start $container_name
 
 #

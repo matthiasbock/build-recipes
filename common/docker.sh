@@ -39,7 +39,7 @@ function create_volume()
 	echo -n "Creating volume '$volume' ... "
 	if ! volume_exists $volume; then
 		docker volume create $volume &> /dev/null
-		echo "Done."
+		echo "done."
 	else
 		echo "already exists. Skipping."
 	fi
@@ -62,9 +62,28 @@ function create_container()
 	echo -n "Creating container '$container' ... "
 	if ! container_exists $container; then
 		$constructor
-		echo "Done."
+		echo "done."
 	else
 		echo "already exists. Skipping."
 	fi
+}
+
+function install_packages()
+{
+	# TODO
+	return 0;
+}
+
+function delete_container()
+{
+	container="$1"
+	echo -n "Deleting container '$container' ... "
+	if ! container_exists $container; then
+		echo "not found. Skipping."
+		return 1;
+	fi
+	docker container stop $container &> /dev/null
+	docker container rm $container &> /dev/null
+	echo "done."
 }
 
