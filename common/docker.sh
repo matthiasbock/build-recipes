@@ -24,11 +24,20 @@ fi
 #
 # Common functions
 #
+function volume_exists()
+{
+	volume="$1"
+	if [ "$(echo $volumes | fgrep $volume)" == "" ]; then
+		return 1;
+	fi
+	return 0;
+}
+
 function create_volume()
 {
 	volume="$1"
-	echo -n "Creating new volume '$volume' ... "
-	if [ "$(echo $volumes | fgrep $volume)" == "" ]; then
+	echo -n "Creating volume '$volume' ... "
+	if ! volume_exists $volume; then
 		docker volume create $volume &> /dev/null
 		echo "Done."
 	else
@@ -36,13 +45,22 @@ function create_volume()
 	fi
 }
 
+function container_exists()
+{
+	container="$1"
+	if [ "$(echo $containers | fgrep $container)" == "" ]; then
+		return 1;
+	fi
+	return 0;
+}
+
 function create_container()
 {
 	container="$1"
 	# Containers may be constructed differently. Using the referenced constructor.
 	constructor="$2"
-	echo -n "Creating new container '$container' ... "
-	if [ "$(echo $containers | fgrep $container)" == "" ]; then
+	echo -n "Creating container '$container' ... "
+	if ! container_exists $container; then
 		$constructor
 		echo "Done."
 	else
