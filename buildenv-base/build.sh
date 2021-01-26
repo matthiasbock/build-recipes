@@ -11,9 +11,7 @@ src_host="~/src"
 src_container="/usr/local/src"
 apt_cacher_host="172.17.0.1"
 
-images=$(docker image ls -a)
-containers=$(docker containers ls -a)
-volumes=$(docker volume ls | awk '{ if ($2 != "VOLUME") { print $2; } }')
+source ../common/docker.sh
 
 if [ "$(echo $volumes | fgrep ccache)" == "" ]; then
 	echo "ccache volume not found. Creating ..."
@@ -21,17 +19,8 @@ if [ "$(echo $volumes | fgrep ccache)" == "" ]; then
 	echo "Created."
 fi
 
-if [ "$(echo $volumes | fgrep apt-cacher)" == "" ]; then
-	echo "apt-cacher volume not found. Creating ..."
-	docker volume create apt-cacher
-	echo "Created."
-fi
-
-if [ "$(echo $images | fgrep apt-cacher)" == "" ]; then
-	echo "apt-cacher image not found. Creating ..."
-	docker run -d --name apt-cacher -p 3142:3142 -v apt-cacher:/var/cache/apt-cacher-ng mbentley/apt-cacher-ng
-	echo "Created."
-fi
+cd "$(dirname $0)"
+./build-apt-cache.sh
 
 if [ "$(echo $containers | fgrep $container_name)" != "" ]; then
 	echo "Container already exists. Aborting."
