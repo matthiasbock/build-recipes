@@ -8,8 +8,7 @@ source conf.sh
 base_image="debian:buster-slim"
 container_name=$buildenv_base_container
 user="c3po"
-#package_bundles="keyrings console-tools version-control build-tools c python3"
-package_bundles="keyrings console-tools version-control"
+package_bundles="keyrings version-control"
 
 common="../common"
 src_host="~/src"
@@ -22,12 +21,10 @@ source ../common/docker.sh
 
 create_volume ccache
 
-echo -n "Creating container '$container_name' ... "
 if container_exists $container_name; then
-	echo "already exists. Skipping."
+	echo "Container '$container_name' already exists. Skipping."
 	exit 0
 fi
-echo
 
 #
 # Create the container
@@ -38,12 +35,13 @@ function constructor()
 		--name $container_name \
 		--net $net \
 		--network-alias $container_name \
-		-v $src_hots:$src_container \
+		-v ccache:/root/.ccache \
 		-v ccache:/home/$user/.ccache \
-		$base_image
+		--workdir /home/$user \
+		$base_image &> /dev/null
 }
 create_container $container_name constructor
-docker start $container_name
+docker start $container_name &> /dev/null
 
 #
 # Configure bash
@@ -52,6 +50,8 @@ echo "Configuring bash ..."
 tmpfile=".bashrc"
 cat $common/shell/*.bashrc > $tmpfile
 docker cp $tmpfile $container_name:/root/
+#docker exec -it $container_name mkdir -p /home/$user
+docker exec -it $container_name useradd -d /home/$user -s /bin/bash $user
 docker cp $tmpfile $container_name:/home/$user/
 rm $tmpfile
 
@@ -75,15 +75,18 @@ done
 pkgs=$(echo -n $pkgs | sed -e "s/  / /g")
 #echo $pkgs
 echo "Installing $(echo -n $pkgs | wc -w) additional packages ..."
-if [ "$pkgs" != "" ]; then
-	for pkg in $pkgs; do
-		docker exec -it $container_name apt-get install -y $pkg
-	done
-fi
+#if [ "$pkgs" != "" ]; then
+#	for pkg in $pkgs; do
+#		docker exec -it $container_name apt-get install -y $pkg
+#	done
+#fi
+docker exec -it $container_name apt-get install -y $pkgs
+
+# Cleanup
+docker exec -it $container_name rm -f /root/.bash_history /home/$user/.bash_history
 docker exec -it $container_name apt-get clean
 
-# Done.
+# Done
 echo "Successfully created container $container_name."
-docker stop $container_name
-docker container ls -a
+docker stop $container_name &> /dev/null
 
