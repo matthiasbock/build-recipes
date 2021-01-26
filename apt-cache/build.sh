@@ -17,7 +17,9 @@ fi
 if [ "$(echo $containers | fgrep $apt_cache_container)" == "" ]; then
 	echo -n "Creating new container '$apt_cache_container' ... "
 	docker run --detach \
-		--name $apt_cache_container --network-alias $apt_cache_container \
+		--name $apt_cache_container \
+		--net $net \
+		--network-alias $apt_cache_container \
 		-p 3142:3142 \
 		-v $apt_cache_volume:/var/cache/apt-cacher-ng mbentley/apt-cacher-ng &> /dev/null
 	echo "Done."
