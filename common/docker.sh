@@ -62,6 +62,13 @@ function create_container()
 	echo -n "Creating container '$container' ... "
 	if ! container_exists $container; then
 		$constructor
+		if [ $? != 0 ]; then
+			echo "Warning: Container constructor exited with a non-zero return value."
+		fi
+#		if ! container_exists $container; then
+#			echo "Error: Failed to create container '$container'."
+#			return 1
+#		fi
 		echo "done."
 	else
 		echo "already exists. Skipping."
@@ -70,8 +77,36 @@ function create_container()
 
 function install_packages()
 {
-	# TODO
-	return 0;
+	pkgs=$*
+	pkgs=$(echo -n $pkgs | sed -e "s/  / /g")
+	count=$(echo -n $pkgs | wc -w)
+	if [ $count == 0 ]; then
+		return 0
+	fi
+	echo "Installing $count packages ..."
+	docker exec -it -u root $container_name aptitude install $pkgs
+#if [ "$pkgs" != "" ]; then
+#      for pkg in $pkgs; do
+#              docker exec -it $container_name apt-get install -y $pkg
+#      done
+#fi
+}
+
+function install_package_bundles()
+{
+	package_bundles=$*
+	pkgs=""
+	for bundle in $package_bundles; do
+	       echo "Adding package bundle: \"$bundle\""
+	       pkgs="$pkgs $(cat $common/package-bundles/$bundle.list)"
+	done
+	install_packages $pkgs
+}
+
+function install_package_list_from_file()
+{
+	pkgs=$(echo -n $(cat $1))
+	install_packages $pkgs
 }
 
 function delete_container()
