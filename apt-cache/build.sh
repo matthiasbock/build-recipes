@@ -3,7 +3,7 @@
 set -e
 #set -x
 cd $(dirname $0)
-source ../common/docker.sh
+source ../common/container.sh
 source conf.sh
 
 create_volume $apt_cache_volume

@@ -2,7 +2,7 @@
 
 set -e
 cd $(dirname $0)
-source ../common/docker.sh
+source ../common/container.sh
 source conf.sh
 
 delete_container $buildenv_base_container

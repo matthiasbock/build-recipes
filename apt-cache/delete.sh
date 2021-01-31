@@ -2,7 +2,7 @@
 
 set -e
 cd $(dirname $0)
-source ../common/docker.sh
+source ../common/container.sh
 source conf.sh
 
 if [ "$(echo $containers | fgrep $apt_cache_container)" == "" ]; then

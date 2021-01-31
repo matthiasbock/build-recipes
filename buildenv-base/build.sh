@@ -17,7 +17,7 @@ src_container="/usr/local/src"
 ../apt-cache/build.sh
 source ../apt-cache/conf.sh
 
-source ../common/docker.sh
+source ../common/container.sh
 
 create_volume ccache
 
