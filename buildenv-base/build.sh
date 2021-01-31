@@ -8,7 +8,7 @@ source conf.sh
 base_image="debian:buster-slim"
 container_name=$buildenv_base_container
 user="c3po"
-package_bundles="keyrings version-control"
+package_bundles="keyrings version-control console-tools"
 
 common="../common"
 src_host="~/src"
