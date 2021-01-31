@@ -1,28 +1,35 @@
 #!/bin/bash
 
+#
+# Setup
+#
 set -e
 
-#
-# docker interface
-#
-export images=$(docker image ls -a --format "{{.Repository}}:{{.Tag}}")
-export containers=$(docker container ls -a --format "{{.Names}}" | awk '{ print $1 }')
-export volumes=$(docker volume ls --format "{{.Name}}")
-export networks=$(docker network ls --format "{{.Name}}")
+export cli="docker"
+#export cli="podman"
 
-#
-# Make sure, a shared docker network exists
-#
+# The shared network between the containers
 export net="buildenv"
 
+#
+# Query existing container stuff
+#
+export images=$($cli image ls -a --format "{{.Repository}}:{{.Tag}}")
+export containers=$($cli container ls -a --format "{{.Names}}" | awk '{ print $1 }')
+export volumes=$($cli volume ls --format "{{.Name}}")
+export networks=$($cli network ls --format "{{.Name}}")
+
+#
+# Create a network shared between the involved containers
+#
 if [ "$(echo $networks | fgrep $net)" == "" ]; then
 	echo -n "Creating missing buildenv network '$net' ... "
-	docker network create $net &> /dev/null
+	$cli network create $net &> /dev/null
 	echo "Done."
 fi
 
 #
-# Common functions
+# Container handling functions
 #
 function volume_exists()
 {
@@ -38,7 +45,7 @@ function create_volume()
 	volume="$1"
 	echo -n "Creating volume '$volume' ... "
 	if ! volume_exists $volume; then
-		docker volume create $volume &> /dev/null
+		$cli volume create $volume &> /dev/null
 		echo "done."
 	else
 		echo "already exists. Skipping."
@@ -84,10 +91,10 @@ function install_packages()
 		return 0
 	fi
 	echo "Installing $count packages ..."
-	docker exec -it -u root $container_name aptitude install $pkgs
+	$cli exec -it -u root $container_name aptitude install $pkgs
 #if [ "$pkgs" != "" ]; then
 #      for pkg in $pkgs; do
-#              docker exec -it $container_name apt-get install -y $pkg
+#              $cli exec -it $container_name apt-get install -y $pkg
 #      done
 #fi
 }
@@ -117,8 +124,8 @@ function delete_container()
 		echo "not found. Skipping."
 		return 1;
 	fi
-	docker container stop $container &> /dev/null
-	docker container rm $container &> /dev/null
+	$cli container stop $container &> /dev/null
+	$cli container rm $container &> /dev/null
 	echo "done."
 }
 
