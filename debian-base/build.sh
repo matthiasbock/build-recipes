@@ -19,7 +19,7 @@ source ../apt-cache/conf.sh
 apt_cache_container="localhost"
 
 source ../common/container.sh
-set +e
+#set +e
 
 
 if container_exists $container_name; then
@@ -42,20 +42,24 @@ function constructor()
 #		--net $net \
 #		--network-alias $container_name \
 }
-create_container $container_name constructor
+create_container "$container_name" constructor #|| exit 1
+
+echo "Starting container ..."
 $cli start $container_name &> /dev/null
 
 #
 # Configure bash
 #
 echo "Configuring bash ..."
+$cli exec -it $container_name bash -c "mkdir -p /home/$user && useradd -d /home/$user -s /bin/bash $user"
 tmpfile=".bashrc"
 cat $common/shell/*.bashrc > $tmpfile
 $cli cp $tmpfile $container_name:/root/
-#$cli exec -it $container_name mkdir -p /home/$user
-$cli exec -it $container_name useradd -d /home/$user -s /bin/bash $user
 $cli cp $tmpfile $container_name:/home/$user/
+$cli exec -it $container_name bash -c "chown -R $user.$user /home/$user"
 rm $tmpfile
+
+# Change hostname
 $cli exec -it $container_name bash -c "echo -n \"$container_name\" > /etc/hostname"
 
 #
