@@ -20,6 +20,8 @@ source ../apt-cache/conf.sh
 apt_cache_container="localhost"
 
 source ../common/container.sh
+set +e
+
 
 if container_exists $container_name; then
 	echo "Container '$container_name' already exists. Skipping."
@@ -36,7 +38,7 @@ function constructor()
 		--pod $pod \
 		--name $container_name \
 		--workdir /home/$user \
-		-v $apt_cache_volume:/var/cache/apt/archives \
+		-v $apt_cache_volume:/var/lib/apt-cache \
 		$base_image &> /dev/null
 
 #		--net $net \
@@ -61,9 +63,11 @@ rm $tmpfile
 # Configure APT
 #
 echo "Configuring APT ..."
-$cli exec -it $container_name bash -c "echo 'Acquire::http::Proxy \"http://$apt_cache_container:3142\";' >> /etc/apt/apt.conf"
-$cli exec -it $container_name bash -c "echo 'APT::Keep-Downloaded-Packages \"true\";' >> /etc/apt/apt.conf"
-$cli exec -it $container_name bash -c "echo 'Binary::apt::APT::Keep-Downloaded-Packages \"true\";' >> /etc/apt/apt.conf"
+# Disable autoclean
+$cli exec -it $container_name rm /etc/apt/apt.conf.d/docker-clean
+# Use our config instead
+$cli cp apt.conf $container_name:/etc/apt/
+$cli exec -it $container_name bash -c "cd /var/lib/apt && rm -rf lists mirrors && rel=\"../apt-cache/apt\" && mkdir -p \$rel/lists \$rel/mirrors && ln \$rel/lists . -s && ln \$rel/mirrors . -s && cd /var/cache && rel=\"../lib/apt-cache\" && rm -fr apt && ln \$rel/apt . -s && mkdir -p /var/cache/apt/archives/partial"
 $cli exec -it $container_name bash -c "apt-get update && apt-get install -y apt-utils dialog ca-certificates apt-transport-https"
 $cli cp $common/sources.list.d/buster.list $container_name:/etc/apt/sources.list
 
@@ -80,7 +84,6 @@ install_package_bundles $package_bundles
 
 # Cleanup
 $cli exec -it $container_name rm -f /root/.bash_history /home/$user/.bash_history
-$cli exec -it $container_name apt-get clean
 
 # Done
 echo "Successfully created container $container_name."

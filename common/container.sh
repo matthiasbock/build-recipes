@@ -92,7 +92,7 @@ function install_packages()
 		return 0
 	fi
 	echo "Installing $count packages ..."
-	$cli exec -it -u root $container_name aptitude install $pkgs
+	$cli exec -it -u root $container_name apt install -y $pkgs
 #if [ "$pkgs" != "" ]; then
 #      for pkg in $pkgs; do
 #              $cli exec -it $container_name apt-get install -y $pkg
