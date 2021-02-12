@@ -15,14 +15,27 @@ export pod="buildenv"
 #
 # Query existing container stuff
 #
-export images=$($cli image ls -a --format "{{.Repository}}:{{.Tag}}")
-export containers=$($cli container ls -a --format "{{.Names}}" | awk '{ print $1 }')
-export volumes=$($cli volume ls --format "{{.Name}}")
-export networks=$($cli network ls --format "{{.Name}}")
+function update_images()
+{
+	export images=$($cli image ls -a --format "{{.Repository}}:{{.Tag}}")
+}
+function update_containers()
+{
+	export containers=$($cli container ls -a --format "{{.Names}}" | awk '{ print $1 }')
+}
+function update_volumes()
+{
+	export volumes=$($cli volume ls --format "{{.Name}}")
+}
+function update_networks()
+{
+	export networks=$($cli network ls --format "{{.Name}}")
+}
 
 #
 # Create a network shared between the involved containers
 #
+update_networks
 if [ "$(echo $networks | fgrep $net)" == "" ]; then
 	echo -n "Creating missing buildenv network '$net' ... "
 	$cli network create $net &> /dev/null
@@ -34,8 +47,9 @@ fi
 #
 function volume_exists()
 {
+	update_volumes
 	name="$1"
-	if [ "$(echo $volumes | fgrep $name)" == "" ]; then
+	if [ "$(echo "$volumes" | fgrep "$name")" == "" ]; then
 		return 1;
 	fi
 	return 0;
@@ -45,8 +59,8 @@ function create_volume()
 {
 	volume="$1"
 	echo -n "Creating volume '$volume' ... "
-	if ! volume_exists $volume; then
-		$cli volume create $volume &> /dev/null
+	if ! volume_exists "$volume"; then
+		$cli volume create "$volume" &> /dev/null
 		echo "done."
 	else
 		echo "already exists. Skipping."
@@ -55,8 +69,9 @@ function create_volume()
 
 function image_exists()
 {
+	update_images
 	name="$1"
-	if [ "$(echo $images | fgrep $name)" == "" ]; then
+	if [ "$(echo "$images" | fgrep "$name")" == "" ]; then
 		return 1;
 	fi
 	return 0;
@@ -64,8 +79,9 @@ function image_exists()
 
 function container_exists()
 {
+	update_containers
 	container="$1"
-	if [ "$(echo $containers | fgrep $container)" == "" ]; then
+	if [ "$(echo "$containers" | fgrep "$container")" == "" ]; then
 		return 1;
 	fi
 	return 0;
@@ -77,19 +93,23 @@ function create_container()
 	# Containers may be constructed differently. Using the referenced constructor.
 	constructor="$2"
 	echo -n "Creating container '$container' ... "
-	if ! container_exists $container; then
+	if ! container_exists "$container"; then
 		$constructor
-		if [ $? != 0 ]; then
-			echo "Warning: Container constructor exited with a non-zero return value."
+		retval=$?
+		if [ $retval == 0 ]; then
+			sleep 1
+		else
+			echo "Container constructor exited with a non-zero return value $retval."
 		fi
-#		if ! container_exists $container; then
-#			echo "Error: Failed to create container '$container'."
-#			return 1
-#		fi
+		if ! container_exists "$container"; then
+			echo "Error: Failed to create container '$container'."
+			return 1
+		fi
 		echo "done."
 	else
 		echo "already exists. Skipping."
 	fi
+	return 0
 }
 
 function install_packages()
