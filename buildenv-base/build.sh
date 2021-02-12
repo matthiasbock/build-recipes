@@ -4,89 +4,68 @@ set -e
 cd "$(dirname $0)"
 
 source conf.sh
+source ../apt-cache/conf.sh
+source ../debian-base/conf.sh
 
-base_image="debian:buster-slim"
-container_name=$buildenv_base_container
-user="c3po"
-package_bundles="keyrings version-control console-tools"
+base_image="$debian_base_image"
+container_name="$buildenv_base_container"
 
+# List of package bundles to install in the container
+package_bundles="version-control build-tools"
+
+#
+# Bind sources
+#
 common="../common"
-src_host="~/src"
+src_host="$(echo -n ~)/src"
 src_container="/usr/local/src"
 
-../apt-cache/build.sh
-source ../apt-cache/conf.sh
-
 source ../common/container.sh
+set +e
 
+
+# Create ccache volume, if necessary
 create_volume ccache
-
-if container_exists $container_name; then
-	echo "Container '$container_name' already exists. Skipping."
-	exit 0
-fi
 
 #
 # Create the container
 #
 function constructor()
 {
-	docker create -it \
+	$cli create \
+		-it \
+		--pod $pod \
 		--name $container_name \
-		--net $net \
-		--network-alias $container_name \
+		--volumes-from $debian_base_container \
 		-v ccache:/root/.ccache \
 		-v ccache:/home/$user/.ccache \
+		-v $src_host:$src_container \
 		--workdir /home/$user \
-		$base_image &> /dev/null
+		--user $user \
+		$base_image
+
+#		--net $net \
+#		--network-alias $container_name \
 }
 create_container $container_name constructor
-docker start $container_name &> /dev/null
 
-#
-# Configure bash
-#
-echo "Configuring bash ..."
-tmpfile=".bashrc"
-cat $common/shell/*.bashrc > $tmpfile
-docker cp $tmpfile $container_name:/root/
-#docker exec -it $container_name mkdir -p /home/$user
-docker exec -it $container_name useradd -d /home/$user -s /bin/bash $user
-docker cp $tmpfile $container_name:/home/$user/
-rm $tmpfile
 
-#
-# Configure/prepare APT
-#
-echo "Enabling package installation ..."
-docker exec -it $container_name bash -c "echo 'Acquire::http::Proxy \"http://$apt_cache_container:3142\";' >> /etc/apt/apt.conf"
-docker exec -it $container_name bash -c "apt-get update && apt-get install -y apt-utils dialog ca-certificates apt-transport-https"
-docker cp $common/sources.list.d/buster.list $container_name:/etc/apt/sources.list
-docker exec -it $container_name bash -c "apt-get update"
+# Start the container
+$cli start $container_name &> /dev/null
 
 #
 # Install additional packages
 #
-pkgs=""
-for bundle in $package_bundles; do
-	echo "Adding package bundle: \"$bundle\""
-	pkgs="$pkgs $(cat $common/package-bundles/$bundle.list)"
-done
-pkgs=$(echo -n $pkgs | sed -e "s/  / /g")
-#echo $pkgs
-echo "Installing $(echo -n $pkgs | wc -w) additional packages ..."
-#if [ "$pkgs" != "" ]; then
-#	for pkg in $pkgs; do
-#		docker exec -it $container_name apt-get install -y $pkg
-#	done
-#fi
-docker exec -it $container_name apt-get install -y $pkgs
+install_package_bundles $package_bundles
 
 # Cleanup
-docker exec -it $container_name rm -f /root/.bash_history /home/$user/.bash_history
-docker exec -it $container_name apt-get clean
+$cli exec -it -u root $container_name rm -f /root/.bash_history /home/$user/.bash_history
 
 # Done
 echo "Successfully created container $container_name."
-docker stop $container_name &> /dev/null
+$cli stop $container_name &> /dev/null
+
+# Commit
+container_commit $container_name
+
 
