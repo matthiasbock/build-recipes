@@ -34,8 +34,8 @@ fi
 #
 function volume_exists()
 {
-	volume="$1"
-	if [ "$(echo $volumes | fgrep $volume)" == "" ]; then
+	name="$1"
+	if [ "$(echo $volumes | fgrep $name)" == "" ]; then
 		return 1;
 	fi
 	return 0;
@@ -51,6 +51,15 @@ function create_volume()
 	else
 		echo "already exists. Skipping."
 	fi
+}
+
+function image_exists()
+{
+	name="$1"
+	if [ "$(echo $images | fgrep $name)" == "" ]; then
+		return 1;
+	fi
+	return 0;
 }
 
 function container_exists()
@@ -115,6 +124,23 @@ function install_package_list_from_file()
 {
 	pkgs=$(echo -n $(cat $1))
 	install_packages $pkgs
+}
+
+function container_commit()
+{
+	container_name="$1"
+	echo -n "Committing container '$container' ... "
+	if ! container_exists $container_name; then
+		echo "not found. Skipping."
+		return 1;
+	fi
+	if image_exists localhost/$container_name; then
+		$cli image rm localhost/$container_name
+	fi
+	tag=$($cli commit $container_name)
+	echo "Commit id: $tag"
+	$cli tag $tag $container_name
+	echo "Tagged as '$container_name'. Done."
 }
 
 function delete_container()

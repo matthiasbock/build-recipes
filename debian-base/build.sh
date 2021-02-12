@@ -90,9 +90,5 @@ echo "Successfully created container $container_name."
 $cli stop $container_name &> /dev/null
 
 # Commit as image
-#TODO
-$cli image rm localhost/$container_name
-tag=$($cli commit $container_name)
-echo "Commit: $tag"
-$cli tag $tag $container_name
+container_commit $container_name
 
