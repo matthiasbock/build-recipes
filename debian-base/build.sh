@@ -1,0 +1,95 @@
+#!/bin/bash
+
+set -e
+cd "$(dirname $0)"
+
+source conf.sh
+
+base_image="debian:buster-slim"
+container_name=$debian_base_container
+user="worker"
+package_bundles="keyrings console-tools"
+
+common="../common"
+
+# Use APT cache
+../apt-cache/build.sh
+source ../apt-cache/conf.sh
+
+# When using pods instead of network aliases:
+apt_cache_container="localhost"
+
+source ../common/container.sh
+
+if container_exists $container_name; then
+	echo "Container '$container_name' already exists. Skipping."
+	exit 0
+fi
+
+#
+# Create the container
+#
+function constructor()
+{
+	$cli create \
+		-it \
+		--pod $pod \
+		--name $container_name \
+		--workdir /home/$user \
+		-v $apt_cache_volume:/var/cache/apt/archives \
+		$base_image &> /dev/null
+
+#		--net $net \
+#		--network-alias $container_name \
+}
+create_container $container_name constructor
+$cli start $container_name &> /dev/null
+
+#
+# Configure bash
+#
+echo "Configuring bash ..."
+tmpfile=".bashrc"
+cat $common/shell/*.bashrc > $tmpfile
+$cli cp $tmpfile $container_name:/root/
+#$cli exec -it $container_name mkdir -p /home/$user
+$cli exec -it $container_name useradd -d /home/$user -s /bin/bash $user
+$cli cp $tmpfile $container_name:/home/$user/
+rm $tmpfile
+
+#
+# Configure APT
+#
+echo "Configuring APT ..."
+$cli exec -it $container_name bash -c "echo 'Acquire::http::Proxy \"http://$apt_cache_container:3142\";' >> /etc/apt/apt.conf"
+$cli exec -it $container_name bash -c "echo 'APT::Keep-Downloaded-Packages \"true\";' >> /etc/apt/apt.conf"
+$cli exec -it $container_name bash -c "echo 'Binary::apt::APT::Keep-Downloaded-Packages \"true\";' >> /etc/apt/apt.conf"
+$cli exec -it $container_name bash -c "apt-get update && apt-get install -y apt-utils dialog ca-certificates apt-transport-https"
+$cli cp $common/sources.list.d/buster.list $container_name:/etc/apt/sources.list
+
+# TODO: console-tools
+$cli exec -it $container_name bash -c "apt-get update && apt-get install -y apt aptitude"
+
+# Workaround for installation problems (e.g. with openjdk-11-jdk)
+$cli exec -it $container_name mkdir -p /usr/share/man/man1/
+
+#
+# Install additional packages
+#
+install_package_bundles $package_bundles
+
+# Cleanup
+$cli exec -it $container_name rm -f /root/.bash_history /home/$user/.bash_history
+$cli exec -it $container_name apt-get clean
+
+# Done
+echo "Successfully created container $container_name."
+$cli stop $container_name &> /dev/null
+
+# Commit as image
+#TODO
+$cli image rm localhost/$container_name
+tag=$($cli commit $container_name)
+echo "Commit: $tag"
+$cli tag $tag $container_name
+
