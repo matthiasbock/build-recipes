@@ -6,13 +6,12 @@ cd "$(dirname $0)"
 source conf.sh
 
 base_image="debian:buster-slim"
-container_name=$debian_base_container
-user="worker"
+container_name="$debian_base_container"
 package_bundles="keyrings console-tools"
 
 common="../common"
 
-# Use APT cache
+# Build APT cache, if necessary
 ../apt-cache/build.sh
 source ../apt-cache/conf.sh
 
@@ -58,6 +57,7 @@ $cli cp $tmpfile $container_name:/root/
 $cli exec -it $container_name useradd -d /home/$user -s /bin/bash $user
 $cli cp $tmpfile $container_name:/home/$user/
 rm $tmpfile
+$cli exec -it $container_name bash -c "echo -n \"$container_name\" > /etc/hostname"
 
 #
 # Configure APT
