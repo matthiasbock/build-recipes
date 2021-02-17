@@ -27,5 +27,5 @@ function constructor()
 
 create_container $apt_cache_container constructor
 
-$cli cp backup.sh $apt_cache_container:/
+$cli cp deb-backup.sh $apt_cache_container:/var/cache/apt-cacher-ng/
 
