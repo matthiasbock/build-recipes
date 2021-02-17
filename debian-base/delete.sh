@@ -6,5 +6,5 @@ source ../common/container.sh
 source conf.sh
 set +e
 
-delete_container $debian_base_container
+delete_container "$container_name"
 
