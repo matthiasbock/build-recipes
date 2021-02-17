@@ -122,6 +122,11 @@ function install_packages()
 	fi
 	echo "Installing $count packages ..."
 	$cli exec -it -u root $container_name apt install -y $pkgs
+	if [ $? != 0 ]; then
+		echo "That failed. Trying with aptitude instead of apt ..."
+		$cli exec -it -u root $container_name aptitude install $pkgs
+	fi
+
 #if [ "$pkgs" != "" ]; then
 #      for pkg in $pkgs; do
 #              $cli exec -it $container_name apt-get install -y $pkg
