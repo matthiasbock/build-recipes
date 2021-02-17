@@ -2,23 +2,14 @@
 
 set -e
 cd "$(dirname $0)"
-
-source conf.sh
-
-base_image="debian:buster-slim"
-container_name="$debian_base_container"
-package_bundles="keyrings console-tools"
-
-common="../common"
+source ../common/container.sh
 
 # Build APT cache, if necessary
 ../apt-cache/build.sh
 source ../apt-cache/conf.sh
 
-# When using pods instead of network aliases:
-apt_cache_container="localhost"
-
-source ../common/container.sh
+# Source our the configuration last
+source conf.sh
 #set +e
 
 
@@ -93,5 +84,5 @@ echo "Successfully created container $container_name."
 $cli stop $container_name &> /dev/null
 
 # Commit as image
-container_commit $container_name
+./commit.sh
 
