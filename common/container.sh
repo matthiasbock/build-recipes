@@ -171,6 +171,7 @@ function container_commit()
 function delete_container()
 {
 	container="$1"
+	if [ "$1" == "" ]; then return 0; fi
 	echo -n "Deleting container '$container' ... "
 	if ! container_exists $container; then
 		echo "not found. Skipping."
