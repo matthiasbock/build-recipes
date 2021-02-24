@@ -128,6 +128,7 @@ function container_start()
 		return 1
 	fi
 	$cli container start "$container"
+	sleep 5
 	echo "Done."
 }
 
@@ -170,6 +171,14 @@ function install_package_list_from_file()
 	install_packages $pkgs
 }
 
+function remove_packages()
+{
+	local container="$1"
+	local pkgs="$2 $3 $4 $5 $6 $7 $8 $9 ${10}"
+	$cli exec -it -u root -w /root "$container" apt-get purge -y $pkgs
+	$cli exec -it -u root -w /root "$container" apt-get autoremove -y
+}
+
 function container_set_hostname()
 {
 	local container="$1"
@@ -180,23 +189,23 @@ function container_set_hostname()
 function container_minimize()
 {
 	local container="$1"
-	$cli exec -it -u root -w /root "$container" bash -c "rm -fRv /tmp/* /var/lock/* /var/log/* /var/mail/* /var/run/* /var/spool/* /var/tmp/* /usr/share/doc /usr/share/man /root/.bash_history /home/$user/.bash_history; rmdir /*"
+	$cli exec -it -u root -w /root "$container" bash -c "rm -fRv /tmp/* /var/lock/* /var/log/* /var/mail/* /var/run/* /var/spool/* /var/tmp/* /usr/share/doc /usr/share/man /root/.bash_history /home/$user/.bash_history; rmdir /*" || :
 }
 
 function container_commit()
 {
 	local container_name="$1"
-	echo -n "Committing container '$container' ... "
-	if ! container_exists $container_name; then
+	echo -n "Committing container '$container_name' ... "
+	if ! container_exists "$container_name"; then
 		echo "not found. Skipping."
 		return 1;
 	fi
-	if image_exists localhost/$container_name; then
-		$cli image rm localhost/$container_name
+	if image_exists "localhost/$container_name"; then
+		$cli image rm "localhost/$container_name"
 	fi
-	local tag=$($cli commit $container_name)
+	local tag=$($cli commit "$container_name")
 	echo "Commit id: $tag"
-	$cli tag $tag $container_name
+	$cli tag "$tag" "$container_name"
 	echo "Tagged as '$container_name'. Done."
 }
 

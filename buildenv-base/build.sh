@@ -14,19 +14,8 @@ debian_base_image="$image_name"
 
 source include.sh
 
-# List of package bundles to install in the container
-package_bundles="version-control build-tools"
-
-#
-# Bind sources
-#
-common="../common"
-src_host="$(echo -n ~)/src"
-src_container="/usr/local/src"
-workdir="$src_container"
-
 source ../common/container.sh
-set +e
+#set +e
 
 
 # Create ccache volume, if necessary
@@ -45,9 +34,10 @@ function constructor()
 		--pod "$pod" \
 		--name "$container_name" \
 		--volumes-from "$debian_base_container" \
+		-v "$sources_dir_host:$sources_dir" \
 		-v "$ccache_volume_name:/root/.ccache" \
 		-v "$ccache_volume_name:/home/$user/.ccache" \
-		-v "$src_host:$src_container" \
+		-v "$artifacts_volume_name:$artifacts_dir" \
 		--user "$user" \
 		--workdir "$workdir" \
 		"$base_image"
@@ -62,7 +52,7 @@ create_container $container_name constructor || exit 1
 $cli start "$container_name" &> /dev/null
 container_set_hostname "$container_name" "$container_name"
 
-$cli exec -t -u root -w / "$container_name" bash -c "mkdir -p /root/.ccache /home/$user/.ccache $sources_folder $artifacts_folder"
+$cli exec -t -u root -w / "$container_name" bash -c "mkdir -p /root/.ccache /home/$user/.ccache $workdir $sources_dir $artifacts_dir"
 
 #
 # Install additional packages

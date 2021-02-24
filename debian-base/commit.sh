@@ -3,10 +3,10 @@
 set -e
 cd "$(dirname $0)"
 source ../common/container.sh
-source conf.sh
+source include.sh
 set +e
 
-if ! container_exists $container_name; then
+if ! container_exists "$container_name"; then
 	echo "Error: Unable to commit non-existent container '$container_name' ."
 	exit 1
 fi
