@@ -5,7 +5,10 @@ cd "$(dirname $0)"
 
 source conf.sh
 source ../apt-cache/conf.sh
+apt_cache_container=$container_name
 source ../debian-base/conf.sh
+debian_base_container=$container_name
+debian_base_image=$image_name
 
 base_image="$debian_base_image"
 container_name="$buildenv_base_container"
