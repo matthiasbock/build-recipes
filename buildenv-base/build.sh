@@ -3,15 +3,16 @@
 set -e
 cd "$(dirname $0)"
 
-source conf.sh
-source ../apt-cache/conf.sh
-apt_cache_container=$container_name
-source ../debian-base/conf.sh
-debian_base_container=$container_name
-debian_base_image=$image_name
+source ../apt-cache/include.sh
+apt_cache_container="$container_name"
 
-base_image="$debian_base_image"
-container_name="$buildenv_base_container"
+source ../debian-base/include.sh
+debian_base_container="$container_name"
+debian_base_image="$image_name"
+
+../debian-base/build.sh
+
+source include.sh
 
 # List of package bundles to install in the container
 package_bundles="version-control build-tools"
@@ -22,13 +23,17 @@ package_bundles="version-control build-tools"
 common="../common"
 src_host="$(echo -n ~)/src"
 src_container="/usr/local/src"
+workdir="$src_container"
 
 source ../common/container.sh
 set +e
 
 
 # Create ccache volume, if necessary
-create_volume ccache
+create_volume "$ccache_volume_name"
+
+# Create artifact volume, if necessary
+create_volume "$artifacts_volume_name"
 
 #
 # Create the container
@@ -36,16 +41,16 @@ create_volume ccache
 function constructor()
 {
 	$cli create \
-		-it \
-		--pod $pod \
-		--name $container_name \
-		--volumes-from $debian_base_container \
-		-v ccache:/root/.ccache \
-		-v ccache:/home/$user/.ccache \
-		-v $src_host:$src_container \
-		--workdir /home/$user \
-		--user $user \
-		$base_image
+		-t \
+		--pod "$pod" \
+		--name "$container_name" \
+		--volumes-from "$debian_base_container" \
+		-v "$ccache_volume_name:/root/.ccache" \
+		-v "$ccache_volume_name:/home/$user/.ccache" \
+		-v "$src_host:$src_container" \
+		--user "$user" \
+		--workdir "$workdir" \
+		"$base_image"
 
 #		--net $net \
 #		--network-alias $container_name \
@@ -54,21 +59,22 @@ create_container $container_name constructor || exit 1
 
 
 # Start the container
-$cli start $container_name &> /dev/null
+$cli start "$container_name" &> /dev/null
+container_set_hostname "$container_name" "$container_name"
+
+$cli exec -t -u root -w / "$container_name" bash -c "mkdir -p /root/.ccache /home/$user/.ccache $sources_folder $artifacts_folder"
 
 #
 # Install additional packages
 #
 install_package_bundles $package_bundles
 
-# Cleanup
-$cli exec -it -u root $container_name rm -f /root/.bash_history /home/$user/.bash_history
-
 # Done
 echo "Successfully created container $container_name."
-$cli stop $container_name &> /dev/null
 
 # Commit
-container_commit $container_name
+container_minimize "$container_name"
+$cli stop $container_name &> /dev/null
+container_commit "$container_name"
 
 

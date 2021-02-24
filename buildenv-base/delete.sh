@@ -3,8 +3,8 @@
 set -e
 cd $(dirname $0)
 source ../common/container.sh
-source conf.sh
+source include.sh
 set +e
 
-delete_container "$buildenv_base_container"
+delete_container "$container_name"
 

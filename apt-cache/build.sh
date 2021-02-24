@@ -5,18 +5,18 @@
 set -e
 cd $(dirname $0)
 source ../common/container.sh
-source conf.sh
+source include.sh
 #set +e
 
-create_volume $apt_cache_volume
+create_volume "$volume_name"
 
 function constructor()
 {
 	$cli run \
+		--pod "$pod" \
+		--name "$container_name" \
+		-v "$volume_name:/var/cache/apt-cacher-ng" \
 		--detach \
-		--name $apt_cache_container \
-		--pod $pod \
-		-v $apt_cache_volume:/var/cache/apt-cacher-ng \
 		mbentley/apt-cacher-ng
 #	&> /dev/null
 
@@ -25,7 +25,7 @@ function constructor()
 #		-p 3142:3142 \
 }
 
-create_container $apt_cache_container constructor
+create_container "$container_name" constructor
 
-$cli cp deb-backup.sh $apt_cache_container:/var/cache/apt-cacher-ng/
+$cli cp deb-backup.sh "$container_name:/var/cache/apt-cacher-ng/"
 

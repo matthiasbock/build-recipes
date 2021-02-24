@@ -4,20 +4,26 @@ set -e
 cd "$(dirname $0)"
 source ../common/container.sh
 
+source ../apt-cache/include.sh
+apt_cache_container="$container_name"
+apt_cache_volume="$volume_name"
+
 # Build APT cache, if necessary
 ../apt-cache/build.sh
-source ../apt-cache/conf.sh
+container_start "$apt_cache_container"
+../apt-cache/backup.sh
 
 # Source our the configuration last
-source conf.sh
+source include.sh
 #set +e
 
 
-if container_exists $container_name; then
+if container_exists "$container_name"; then
 	echo "Container '$container_name' already exists. Skipping."
 	exit 0
 fi
 
+echo $container_name
 #
 # Create the container
 #
@@ -25,10 +31,10 @@ function constructor()
 {
 	$cli create \
 		-it \
-		--pod $pod \
-		--name $container_name \
-		-v $apt_cache_volume:/var/lib/apt-cache \
-		$base_image &> /dev/null
+		--pod "$pod" \
+		--name "$container_name" \
+		-v "$apt_cache_volume:/var/lib/apt-cache" \
+		"$base_image" &> /dev/null
 
 #		--net $net \
 #		--network-alias $container_name \
@@ -36,7 +42,8 @@ function constructor()
 create_container "$container_name" constructor #|| exit 1
 
 echo "Starting container ..."
-$cli start $container_name &> /dev/null
+echo $container_name
+container_start "$container_name" || exit 1
 
 #
 # Configure bash

@@ -19,14 +19,17 @@ function update_images()
 {
 	export images=$($cli image ls -a --format "{{.Repository}}:{{.Tag}}")
 }
+
 function update_containers()
 {
 	export containers=$($cli container ls -a --format "{{.Names}}" | awk '{ print $1 }')
 }
+
 function update_volumes()
 {
 	export volumes=$($cli volume ls --format "{{.Name}}")
 }
+
 function update_networks()
 {
 	export networks=$($cli network ls --format "{{.Name}}")
@@ -48,7 +51,7 @@ fi
 function volume_exists()
 {
 	update_volumes
-	name="$1"
+	local name="$1"
 	if [ "$(echo "$volumes" | fgrep "$name")" == "" ]; then
 		return 1;
 	fi
@@ -57,7 +60,7 @@ function volume_exists()
 
 function create_volume()
 {
-	volume="$1"
+	local volume="$1"
 	echo -n "Creating volume '$volume' ... "
 	if ! volume_exists "$volume"; then
 		$cli volume create "$volume" &> /dev/null
@@ -70,7 +73,7 @@ function create_volume()
 function image_exists()
 {
 	update_images
-	name="$1"
+	local name="$1"
 	if [ "$(echo "$images" | fgrep "$name")" == "" ]; then
 		return 1;
 	fi
@@ -80,7 +83,7 @@ function image_exists()
 function container_exists()
 {
 	update_containers
-	container="$1"
+	local container="$1"
 	if [ "$(echo "$containers" | fgrep "$container")" == "" ]; then
 		return 1;
 	fi
@@ -89,13 +92,13 @@ function container_exists()
 
 function create_container()
 {
-	container="$1"
+	local container="$1"
 	# Containers may be constructed differently. Using the referenced constructor.
-	constructor="$2"
+	local constructor="$2"
 	echo -n "Creating container '$container' ... "
 	if ! container_exists "$container"; then
 		$constructor
-		retval=$?
+		local retval=$?
 		if [ $retval == 0 ]; then
 			sleep 1
 		else
@@ -112,16 +115,32 @@ function create_container()
 	return 0
 }
 
+function container_start()
+{
+	local container="$1"
+	echo -n "Starting container '$container' ... "
+	if [ "$container" == "" ]; then
+		echo "Error: Container name/ID is empty. Aborting."
+		return 1
+	fi
+	if ! container_exists "$container"; then
+		echo "Container '$container' not found. Aborting"
+		return 1
+	fi
+	$cli container start "$container"
+	echo "Done."
+}
+
 function install_packages()
 {
-	pkgs=$*
-	pkgs=$(echo -n $pkgs | sed -e "s/  / /g")
-	count=$(echo -n $pkgs | wc -w)
+	local pkgs=$*
+	local pkgs=$(echo -n $pkgs | sed -e "s/  / /g")
+	local count=$(echo -n $pkgs | wc -w)
 	if [ $count == 0 ]; then
 		return 0
 	fi
 	echo "Installing $count packages ..."
-	$cli exec -it -u root $container_name apt install -y $pkgs
+	$cli exec -it -u root $container_name apt-get install -y $pkgs
 	if [ $? != 0 ]; then
 		echo "That failed. Trying with aptitude instead of apt ..."
 		$cli exec -it -u root $container_name aptitude install $pkgs
@@ -136,24 +155,37 @@ function install_packages()
 
 function install_package_bundles()
 {
-	package_bundles=$*
-	pkgs=""
+	local package_bundles=$*
+	local pkgs=""
 	for bundle in $package_bundles; do
 	       echo "Adding package bundle: \"$bundle\""
-	       pkgs="$pkgs $(cat $common/package-bundles/$bundle.list)"
+	       local pkgs="$pkgs $(cat $common/package-bundles/$bundle.list)"
 	done
 	install_packages $pkgs
 }
 
 function install_package_list_from_file()
 {
-	pkgs=$(echo -n $(cat $1))
+	local pkgs=$(echo -n $(cat $1))
 	install_packages $pkgs
+}
+
+function container_set_hostname()
+{
+	local container="$1"
+	local hostname="$2"
+	$cli exec -it -u root -w /etc "$container" bash -c "echo \"$hostname\" > hostname"
+}
+
+function container_minimize()
+{
+	local container="$1"
+	$cli exec -it -u root -w /root "$container" bash -c "rm -fRv /tmp/* /var/lock/* /var/log/* /var/mail/* /var/run/* /var/spool/* /var/tmp/* /usr/share/doc /usr/share/man /root/.bash_history /home/$user/.bash_history; rmdir /*"
 }
 
 function container_commit()
 {
-	container_name="$1"
+	local container_name="$1"
 	echo -n "Committing container '$container' ... "
 	if ! container_exists $container_name; then
 		echo "not found. Skipping."
@@ -162,7 +194,7 @@ function container_commit()
 	if image_exists localhost/$container_name; then
 		$cli image rm localhost/$container_name
 	fi
-	tag=$($cli commit $container_name)
+	local tag=$($cli commit $container_name)
 	echo "Commit id: $tag"
 	$cli tag $tag $container_name
 	echo "Tagged as '$container_name'. Done."
@@ -170,7 +202,7 @@ function container_commit()
 
 function delete_container()
 {
-	container="$1"
+	local container="$1"
 	if [ "$1" == "" ]; then return 0; fi
 	echo -n "Deleting container '$container' ... "
 	if ! container_exists $container; then
