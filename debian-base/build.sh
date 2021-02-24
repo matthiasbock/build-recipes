@@ -35,7 +35,7 @@ function constructor()
 		-it \
 		--pod "$pod" \
 		--name "$container_name" \
-		-v "$apt_cache_volume:/var/lib/apt-cache" \
+		-v "$apt_cache_volume:$apt_cache_dir" \
 		"$base_image" &> /dev/null
 
 #		--net $net \

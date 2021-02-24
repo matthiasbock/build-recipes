@@ -3,6 +3,8 @@
 set -e
 cd "$(dirname $0)"
 
+source ../common/container.sh
+
 source ../apt-cache/include.sh
 apt_cache_container="$container_name"
 
@@ -13,8 +15,6 @@ debian_base_image="$image_name"
 ../debian-base/build.sh
 
 source include.sh
-
-source ../common/container.sh
 #set +e
 
 
@@ -23,6 +23,11 @@ create_volume "$ccache_volume_name"
 
 # Create artifact volume, if necessary
 create_volume "$artifacts_volume_name"
+
+if container_exists "$container_name"; then
+	echo "Container '$container_name' already exists. Skipping."
+	exit 0
+fi
 
 #
 # Create the container
