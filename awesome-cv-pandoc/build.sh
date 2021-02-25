@@ -4,6 +4,7 @@ set -e
 cd $(dirname $0)
 
 source ../common/container.sh
+source ../common/packages.sh
 
 source ../apt-cache/include.sh
 apt_cache_container="$container_name"
@@ -49,7 +50,8 @@ container_start "$buildenv_base_container"
 container_start "$container_name"
 container_set_hostname "$container_name" "$container_name"
 
-$cli exec -t -u root -w / "$container_name" bash -c "mkdir /tmp && chmod 777 /tmp -R"
+# Workaround for missing dirs
+$cli exec -t -u root -w / "$container_name" bash -c "mkdir -p /tmp /var/tmp /var/log /var/lock /usr/share/man/man1; chmod 777 /tmp -R;" || :
 
 # Install build dependencies
 remove_packages "openjdk-11-*"
@@ -58,7 +60,9 @@ install_packages "$build_dependencies"
 # Clone repo, if necessary
 $cli exec -t -w "/home/$user" "$container_name" bash -c "mkdir -p \"$path_project\" && cd \"$path_project\" && if [ -e \"$repo\" ]; then cd \"$repo\"; git pull; else git clone \"$git_url\" \"$repo\"; fi"
 
-remove_packages apt aptitude subversion mercurial
+set -x
+remove_packages aptitude subversion mercurial
+#purge_force_depends dmsetup systemd
 
 container_minimize "$container_name"
 

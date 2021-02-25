@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source ../common/include.sh
+common="../common"
+source "$common/include.sh"
 
 
 function install_packages()
@@ -40,6 +41,20 @@ function install_package_list_from_file()
 {
 	local pkgs=$(echo -n $(cat $1))
 	install_packages $pkgs
+}
+
+function blacklist_packages()
+{
+	config="/etc/apt/preferences"
+	for pkg in $*; do
+		stanza="Package: $pkg\nPin: release *\nPin-Priority: -1\n\n"
+		# TODO
+	done
+}
+
+function purge_force_depends()
+{
+	$cli exec -it -u root -w /root "$container_name" dpkg --force-depends purge $*
 }
 
 function remove_packages()
