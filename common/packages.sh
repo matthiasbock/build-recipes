@@ -60,7 +60,9 @@ function purge_force_depends()
 function remove_packages()
 {
 	local pkgs=$*
+	echo "Removing $(echo $pkgs | wc -w) packages ..."
 	$cli exec -it -u root -w /root "$container_name" apt-get purge -y --allow-remove-essential $pkgs
 	$cli exec -it -u root -w /root "$container_name" apt-get autoremove -y --allow-remove-essential
+	echo "Package removal complete."
 }
 

@@ -2,4 +2,6 @@
 .*.swp
 *.bak
 *.bck
+.goutputstream*
+.~lock*
 
