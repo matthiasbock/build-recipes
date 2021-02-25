@@ -1,16 +1,7 @@
 #!/bin/bash
 
-#
-# Setup
-#
-set -e
+source ../common/include.sh
 
-#export cli="docker"
-export cli="podman"
-
-# The shared network between the containers
-export net="buildenv"
-export pod="buildenv"
 
 #
 # Query existing container stuff
@@ -132,52 +123,6 @@ function container_start()
 	echo "Done."
 }
 
-function install_packages()
-{
-	local pkgs=$*
-	local pkgs=$(echo -n $pkgs | sed -e "s/  / /g")
-	local count=$(echo -n $pkgs | wc -w)
-	if [ $count == 0 ]; then
-		return 0
-	fi
-	echo "Installing $count packages ..."
-	$cli exec -it -u root $container_name apt-get install -y $pkgs
-	if [ $? != 0 ]; then
-		echo "That failed. Trying with aptitude instead of apt ..."
-		$cli exec -it -u root $container_name aptitude install $pkgs
-	fi
-
-#if [ "$pkgs" != "" ]; then
-#      for pkg in $pkgs; do
-#              $cli exec -it $container_name apt-get install -y $pkg
-#      done
-#fi
-}
-
-function install_package_bundles()
-{
-	local package_bundles=$*
-	local pkgs=""
-	for bundle in $package_bundles; do
-	       echo "Adding package bundle: \"$bundle\""
-	       local pkgs="$pkgs $(cat $common/package-bundles/$bundle.list)"
-	done
-	install_packages $pkgs
-}
-
-function install_package_list_from_file()
-{
-	local pkgs=$(echo -n $(cat $1))
-	install_packages $pkgs
-}
-
-function remove_packages()
-{
-	local pkgs=$*
-	$cli exec -it -u root -w /root "$container_name" apt-get purge -y $pkgs
-	$cli exec -it -u root -w /root "$container_name" apt-get autoremove -y
-}
-
 function container_set_hostname()
 {
 	local container="$1"
@@ -188,7 +133,7 @@ function container_set_hostname()
 function container_minimize()
 {
 	local container="$1"
-	$cli exec -it -u root -w /root "$container" bash -c "rm -fRv /tmp/* /var/lock/* /var/log/* /var/mail/* /var/run/* /var/spool/* /var/tmp/* /usr/share/doc /usr/share/man /root/.bash_history /home/$user/.bash_history" || :
+	$cli exec -it -u root -w /root "$container" bash -c "find /tmp/ /var/lock/ /var/log/ /var/mail/ /var/run/ /var/spool /var/tmp/ /usr/share/doc/ /usr/share/man/ -type f -exec rm -fv {} \; ; rm -fv /root/.bash_history /home/$user/.bash_history; apt-get autoremove -y --allow-remove-essential" || :
 }
 
 function container_commit()
