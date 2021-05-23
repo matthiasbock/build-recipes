@@ -2,6 +2,7 @@
 
 source ../common/container.sh
 
+export parent_repository="docker://mbentley/apt-cacher-ng"
 export container_name="apt-cache"
 export volume_name="apt-cache"
 export apt_cache_dir="/var/lib/apt-cacher-ng"
