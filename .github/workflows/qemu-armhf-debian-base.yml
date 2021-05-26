@@ -95,7 +95,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: rootfs
-          path: {{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
+          path: ${{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
           retention-days: 1
 
   github-release:
@@ -110,7 +110,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: rootfs
-          path: {{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
+          path: ${{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
 
       - name: Create tar.gz
         run: |
@@ -124,7 +124,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: {{ env.ARCHIVE }}
+          files: ${{ env.ARCHIVE }}
 
   docker-build:
     name: Docker build
@@ -141,7 +141,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: qemu-armhf-debian-base-workdir
-          path: {{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
+          path: ${{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
 
       - name: Build Docker image
         run: |
@@ -153,7 +153,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: qemu-armhf-debian-base-docker-image
-          path: {{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.FILENAME }}
+          path: ${{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.FILENAME }}
           retention-days: 1
 
   docker-deploy:
@@ -168,7 +168,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: qemu-armhf-debian-base-docker-image
-          path: {{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.FILENAME }}
+          path: ${{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.FILENAME }}
 
       - name: Load Docker image
         run: |
