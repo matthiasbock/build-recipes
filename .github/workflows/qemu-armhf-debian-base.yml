@@ -84,18 +84,20 @@ jobs:
           cd "$GITHUB_WORKSPACE/images/qemu-armhf-debian-base/"
           sudo chroot "$WORKDIR" qemu-arm-static bin/bash -c \
             "apt-get update; \
-            apt-get install netselect-apt; \
-            netselect-apt -s DEBIAN_RELEASE; \
-            apt-get install -y ubuntu-*keyring debian-*keyring ca-certificates; \
+            apt-get install -y ca-certificates; \
+            apt-get update; \
+            apt-get install -y ubuntu-*keyring debian-*keyring; \
             apt-key list; \
+            apt-get install -y netselect-apt; \
+            netselect-apt -s DEBIAN_RELEASE; \
             apt-get install -y coreutils bash vim nano apt aptitude rsync wget git; \
             apt-get clean"
 
       - name: Save working directory
         uses: actions/upload-artifact@v2
         with:
-          name: rootfs
-          path: ${{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
+          name: qemu-armhf-debian-base-rootfs
+          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
           retention-days: 1
 
   github-release:
@@ -109,8 +111,8 @@ jobs:
       - name: Retrieve working directory
         uses: actions/download-artifact@v2
         with:
-          name: rootfs
-          path: ${{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
+          name: qemu-armhf-debian-base-rootfs
+          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
 
       - name: Create tar.gz
         run: |
@@ -141,7 +143,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: qemu-armhf-debian-base-workdir
-          path: ${{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
+          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
 
       - name: Build Docker image
         run: |
@@ -153,7 +155,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: qemu-armhf-debian-base-docker-image
-          path: ${{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.FILENAME }}
+          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/{{ env.FILENAME }}
           retention-days: 1
 
   docker-deploy:
@@ -168,7 +170,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: qemu-armhf-debian-base-docker-image
-          path: ${{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.FILENAME }}
+          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/{{ env.FILENAME }}
 
       - name: Load Docker image
         run: |
