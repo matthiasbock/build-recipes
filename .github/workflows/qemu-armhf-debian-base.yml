@@ -58,7 +58,7 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          sudo apt-get install -y qemu-user-static debootstrap
+          sudo apt-get install -y qemu-user-static debootstrap coreutils
 
       - name: Bootstrap Debian
         run: |
@@ -83,5 +83,5 @@ jobs:
       - name: Install base packages
         run: |
           cd "$GITHUB_WORKSPACE/images/qemu-armhf-debian-base/"
-          sudo chroot "$WORKDIR" qemu-arm-static "apt-get update; apt-get install -y apt aptitude rsync wget vim nano git; apt-get clean"
+          sudo chroot "$WORKDIR" qemu-arm-static bin/bash -c "apt-get update; apt-get install -y bash vim nano apt aptitude rsync wget git; apt-get clean"
 
