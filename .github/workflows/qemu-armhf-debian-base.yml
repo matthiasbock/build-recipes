@@ -94,7 +94,7 @@ jobs:
       - name: Save working directory
         uses: actions/upload-artifact@v2
         with:
-          name: qemu-armhf-debian-base-rootfs
+          name: rootfs
           path: {{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
           retention-days: 1
 
@@ -109,7 +109,7 @@ jobs:
       - name: Retrieve working directory
         uses: actions/download-artifact@v2
         with:
-          name: qemu-armhf-debian-base-rootfs
+          name: rootfs
           path: {{ env.GITHUB_WORKSPACE }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
 
       - name: Create tar.gz
@@ -193,5 +193,5 @@ jobs:
       - uses: geekyeggo/delete-artifact@v1
         with:
           name:
-            - qemu-armhf-debian-base-rootfs
+            - rootfs
             - qemu-armhf-debian-base-docker-image
