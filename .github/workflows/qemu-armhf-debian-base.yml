@@ -46,11 +46,14 @@ jobs:
           cd .github/workflows/
           cat ${GITHUB_WORKFLOW}.yml
 
-      # Runs a set of commands using the runners shell
-      - name: Install build dependencies
+      - name: Prepare for package installation
         run: |
           sudo apt-get update
           sudo apt-get install -y ubuntu-*keyring debian-*keyring
+          apt-key list
+
+      - name: Install build dependencies
+        run: |
           sudo apt-get install -y qemu-user-static debootstrap
 
       - name: Bootstrap Debian
@@ -66,11 +69,8 @@ jobs:
           me=$(whoami)
           echo "I am $me."
           sudo chown $me "$WORKDIR/"
-          cd "$WORKDIR/"
-          ls -la
-          sudo echo "armhf" > "etc/hostname"
-          sudo echo "deb https://deb.debian.org/debian buster main" > "etc/apt/sources.list"
-          sudo echo "deb-src https://deb.debian.org/debian buster main" >> "etc/apt/sources.list"
+          sudo cp -v hostname "$WORKDIR/etc/"
+          sudo cp -v sources.list "$WORKDIR/etc/apt/"
 
       - name: Install base packages
         run: |
