@@ -101,7 +101,7 @@ jobs:
           retention-days: 1
 
   github-release:
-    name: Compress and release created rootfs
+    name: Release tarball
     needs: bootstrap
     runs-on: ubuntu-latest
     env:
@@ -129,7 +129,7 @@ jobs:
           files: ${{ env.ARCHIVE }}
 
   docker-build:
-    name: Docker build
+    name: Build Docker image
     needs: bootstrap
     runs-on: ubuntu-latest
     env:
@@ -155,7 +155,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: qemu-armhf-debian-base-docker-image
-          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/{{ env.FILENAME }}
+          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/${{ env.FILENAME }}
           retention-days: 1
 
   docker-deploy:
@@ -170,7 +170,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: qemu-armhf-debian-base-docker-image
-          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/{{ env.FILENAME }}
+          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/${{ env.FILENAME }}
 
       - name: Load Docker image
         run: |
