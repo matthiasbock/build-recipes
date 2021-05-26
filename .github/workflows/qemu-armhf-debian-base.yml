@@ -31,6 +31,7 @@ jobs:
     env:
         DEBIAN_REPO: https://deb.debian.org/debian/
         DEBIAN_RELEASE: buster
+        DEBIAN_VARIANT: minbase
         WORKDIR: image
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -56,7 +57,7 @@ jobs:
           cd $GITHUB_WORKSPACE/images/qemu-armhf-debian-base/
           ls -la
           mkdir -p "$WORKDIR"
-          sudo qemu-debootstrap --arch=armhf "$release" --variant=minbase "$folder" "$deb_repo"
+          sudo qemu-debootstrap --arch=armhf "$DEBIAN_RELEASE" --variant="$DEBIAN_VARIANT" "$WORKDIR" "$DEBIAN_REPO"
           sudo echo "armhf" > "$WORKDIR/etc/hostname"
           sudo echo "deb https://deb.debian.org/debian buster main" > "$WORKDIR/etc/apt/sources.list"
           sudo echo "deb-src https://deb.debian.org/debian buster main" >> "$WORKDIR/etc/apt/sources.list"
