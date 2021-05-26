@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-        DEBIAN_REPO: https://deb.debian.org/debian/
+        DEBIAN_REPO: http://deb.debian.org/debian/
         DEBIAN_RELEASE: buster
         DEBIAN_VARIANT: minbase
         WORKDIR: image
@@ -53,7 +53,7 @@ jobs:
       - name: Prepare for package installation
         run: |
           sudo apt-get update
-          sudo apt-get install -y ubuntu-*keyring debian-*keyring
+          sudo apt-get install -y ubuntu-*keyring debian-*keyring ca-certificates
           apt-key list
 
       - name: Install build dependencies
@@ -87,9 +87,9 @@ jobs:
             "apt-get update; \
             apt-get install netselect-apt; \
             netselect-apt -s DEBIAN_RELEASE; \
-            apt-get install -y ubuntu-*keyring debian-*keyring; \
+            apt-get install -y ubuntu-*keyring debian-*keyring ca-certificates; \
             apt-key list; \
-            apt-get install -y bash vim nano apt aptitude rsync wget git; \
+            apt-get install -y coreutils bash vim nano apt aptitude rsync wget git; \
             apt-get clean"
 
       - name: Create an archive
@@ -105,4 +105,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          file: qemu-armhf-debian-base.tar.gz
+          files: qemu-armhf-debian-base.tar.gz
