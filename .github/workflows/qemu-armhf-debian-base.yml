@@ -50,17 +50,27 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
+          sudo apt-get install -y ubuntu-*keyring debian-*keyring
           sudo apt-get install -y qemu-user-static debootstrap
 
       - name: Bootstrap Debian
         run: |
-          cd $GITHUB_WORKSPACE/images/qemu-armhf-debian-base/
+          cd "$GITHUB_WORKSPACE/images/qemu-armhf-debian-base/"
           ls -la
           mkdir -p "$WORKDIR"
           sudo qemu-debootstrap --arch=armhf "$DEBIAN_RELEASE" --variant="$DEBIAN_VARIANT" "$WORKDIR" "$DEBIAN_REPO"
-          sudo echo "armhf" > "$WORKDIR/etc/hostname"
-          sudo echo "deb https://deb.debian.org/debian buster main" > "$WORKDIR/etc/apt/sources.list"
-          sudo echo "deb-src https://deb.debian.org/debian buster main" >> "$WORKDIR/etc/apt/sources.list"
+
+      - name: Patch bootstrapped system
+        run: |
+          cd "$GITHUB_WORKSPACE/images/qemu-armhf-debian-base/"
+          me=$(whoami)
+          echo "I am $me."
+          sudo chown $me "$WORKDIR/"
+          cd "$WORKDIR/"
+          ls -la
+          sudo echo "armhf" > "etc/hostname"
+          sudo echo "deb https://deb.debian.org/debian buster main" > "etc/apt/sources.list"
+          sudo echo "deb-src https://deb.debian.org/debian buster main" >> "etc/apt/sources.list"
 
       - name: Install base packages
         run: |
