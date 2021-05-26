@@ -93,12 +93,18 @@ jobs:
             apt-get install -y coreutils bash vim nano apt aptitude rsync wget git; \
             apt-get clean"
 
-      - name: Save working directory
+      - name: Upload working directory
         uses: actions/upload-artifact@v2
         with:
           name: qemu-armhf-debian-base-rootfs
-          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
+          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/${{ env.WORKDIR }}
           retention-days: 1
+
+      - name: Verify upload
+        uses: actions/download-artifact@v2
+        with:
+          name: qemu-armhf-debian-base-rootfs
+          path: ${{ github.workspace }}
 
   github-release:
     name: Release tarball
@@ -112,7 +118,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: qemu-armhf-debian-base-rootfs
-          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
+          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/${{ env.WORKDIR }}
 
       - name: Create tar.gz
         run: |
@@ -143,7 +149,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: qemu-armhf-debian-base-workdir
-          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/{{ env.WORKDIR }}
+          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/${{ env.WORKDIR }}
 
       - name: Build Docker image
         run: |
