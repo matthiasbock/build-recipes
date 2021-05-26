@@ -39,8 +39,12 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: Info
+      - name: Print debug information
         run: |
+          me=$(whoami)
+          echo "I am $me."
+          uname -a
+          echo $GITHUB_WORKSPACE
           cd $GITHUB_WORKSPACE
           ls -la
           cd .github/workflows/
@@ -63,14 +67,18 @@ jobs:
           mkdir -p "$WORKDIR"
           sudo qemu-debootstrap --arch=armhf "$DEBIAN_RELEASE" --variant="$DEBIAN_VARIANT" "$WORKDIR" "$DEBIAN_REPO"
 
-      - name: Patch bootstrapped system
+      - name: Configure bootstrapped system
         run: |
           cd "$GITHUB_WORKSPACE/images/qemu-armhf-debian-base/"
           me=$(whoami)
-          echo "I am $me."
           sudo chown $me "$WORKDIR/"
           sudo cp -v hostname "$WORKDIR/etc/"
           sudo cp -v sources.list "$WORKDIR/etc/apt/"
+
+      - name: Add qemu binary
+        run: |
+          cd "$GITHUB_WORKSPACE/images/qemu-armhf-debian-base/"
+          cp -v "$(which qemu-arm-static)" "$WORKDIR"
 
       - name: Install base packages
         run: |
