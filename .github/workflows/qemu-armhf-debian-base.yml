@@ -11,7 +11,9 @@ on:
     paths:
       - '!.**'
       - '!**'
-      - 'images/qemu-armhf-debian-base'
+      - '.github/workflows/qemu-armhf-debian-base.yml'
+      - 'qemu-armhf-debian-base/**'
+      - 'images/qemu-armhf-debian-base/**'
       
 #  pull_request:
 #    branches: [ master ]
@@ -34,10 +36,14 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Install build dependencies
         run: |
-          apt update
-          apt install -y qemu-user-static qemu-debootstrap
+          sudo apt update
+          sudo apt install -y qemu-user-static qemu-debootstrap
 
       - name: Enter workspace and build image
         run: |
           cd $GITHUB_WORKSPACE
           ls -la
+          cd images/qemu-armhf-debian-base/
+          ls -la
+          ./build.sh
+
