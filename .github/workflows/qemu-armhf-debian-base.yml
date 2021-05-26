@@ -80,8 +80,29 @@ jobs:
           cd "$GITHUB_WORKSPACE/images/qemu-armhf-debian-base/"
           cp -v "$(which qemu-arm-static)" "$WORKDIR"
 
-      - name: Install base packages
+      - name: Install additional packages
         run: |
           cd "$GITHUB_WORKSPACE/images/qemu-armhf-debian-base/"
-          sudo chroot "$WORKDIR" qemu-arm-static bin/bash -c "apt-get update; apt-get install -y bash vim nano apt aptitude rsync wget git; apt-get clean"
+          sudo chroot "$WORKDIR" qemu-arm-static bin/bash -c \
+            "apt-get update; \
+            apt-get install netselect-apt; \
+            netselect-apt -s DEBIAN_RELEASE; \
+            apt-get install -y ubuntu-*keyring debian-*keyring; \
+            apt-key list; \
+            apt-get install -y bash vim nano apt aptitude rsync wget git; \
+            apt-get clean"
 
+      - name: Create an archive
+        run: |
+            cd "$GITHUB_WORKSPACE/images/qemu-armhf-debian-base/$WORKDIR/"
+            export archive="qemu-armhf-debian-base.tar.gz"
+            sudo tar -czvf "../$archive" .
+            me=$(whoami)
+            sudo chown $me "../$archive"
+
+      - name: Release archive on GitHub
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: qemu-armhf-debian-base.tar.gz
