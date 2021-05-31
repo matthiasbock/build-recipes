@@ -52,13 +52,13 @@ jobs:
 
       - name: Prepare for package installation
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ubuntu-*keyring debian-*keyring ca-certificates
+          sudo apt-get -q update
+          sudo apt-get -q install -y ubuntu-*keyring debian-*keyring ca-certificates
           apt-key list
 
       - name: Install build dependencies
         run: |
-          sudo apt-get install -y qemu-user-static debootstrap coreutils
+          sudo apt-get -q install -y qemu-user-static debootstrap coreutils
 
       - name: Bootstrap Debian
         run: |
@@ -84,15 +84,15 @@ jobs:
         run: |
           cd "$GITHUB_WORKSPACE/images/qemu-armhf-debian-base/"
           sudo chroot "$WORKDIR" qemu-arm-static bin/bash -c \
-            "apt-get update; \
-            apt-get install -y ca-certificates; \
-            apt-get update; \
-            apt-get install -y ubuntu-*keyring debian-*keyring; \
+            "apt-get -q update; \
+            apt-get -q install -y ca-certificates; \
+            apt-get -q update; \
+            apt-get -q install -y ubuntu-*keyring debian-*keyring; \
             apt-key list; \
-            apt-get install -y netselect-apt; \
+            apt-get -q install -y netselect-apt; \
             netselect-apt -s $DEBIAN_RELEASE; \
-            apt-get install -y coreutils bash vim nano apt aptitude rsync wget git; \
-            apt-get clean"
+            apt-get -q install -y coreutils bash vim nano apt aptitude rsync wget git; \
+            apt-get -q clean"
 
       - name: Prepare artifact
         run: |
