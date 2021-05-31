@@ -18,7 +18,7 @@ on:
       - '.github/workflows/qemu-armhf-debian-base.yml'
       - 'qemu-armhf-debian-base/**'
       - 'images/qemu-armhf-debian-base/**'
-      
+
 #  pull_request:
 #    branches: [ master ]
 
@@ -35,6 +35,7 @@ jobs:
       DEBIAN_RELEASE: buster
       DEBIAN_VARIANT: minbase
       WORKDIR: image
+      ARTIFACT: image.tar.gz
     steps:
       - uses: actions/checkout@v2
 
@@ -89,22 +90,22 @@ jobs:
             apt-get install -y ubuntu-*keyring debian-*keyring; \
             apt-key list; \
             apt-get install -y netselect-apt; \
-            netselect-apt -s DEBIAN_RELEASE; \
+            netselect-apt -s $DEBIAN_RELEASE; \
             apt-get install -y coreutils bash vim nano apt aptitude rsync wget git; \
             apt-get clean"
+
+      - name: Prepare artifact
+        run: |
+            cd "$GITHUB_WORKSPACE/images/qemu-armhf-debian-base/"
+            sudo tar -cvzf $ARTIFACT image/
+            sudo chmod +r $ARTIFACT
 
       - name: Upload working directory
         uses: actions/upload-artifact@v2
         with:
           name: qemu-armhf-debian-base-rootfs
-          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/${{ env.WORKDIR }}
+          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/${{ env.ARTIFACT }}
           retention-days: 1
-
-      - name: Verify upload
-        uses: actions/download-artifact@v2
-        with:
-          name: qemu-armhf-debian-base-rootfs
-          path: ${{ github.workspace }}
 
   github-release:
     name: Release tarball
@@ -112,44 +113,43 @@ jobs:
     runs-on: ubuntu-latest
     env:
       WORKDIR: image
-      ARCHIVE: qemu-armhf-debian-base.tar
+      ARTIFACT: image.tar.gz
     steps:
-      - name: Retrieve working directory
+      - name: Retrieve artifact
         uses: actions/download-artifact@v2
         with:
           name: qemu-armhf-debian-base-rootfs
-          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/${{ env.WORKDIR }}
+          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/${{ env.ARTIFACT }}
 
-      - name: Create tar.gz
-        run: |
-          cd "$GITHUB_WORKSPACE/images/qemu-armhf-debian-base/$WORKDIR/"
-          sudo tar -czvf "../$ARCHIVE" .
-          me=$(whoami)
-          sudo chown $me "../$ARCHIVE"
-
-      - name: Release tar.gz on GitHub
+      - name: Release on GitHub
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: ${{ env.ARCHIVE }}
+          files: ${{ env.ARTIFACT }}
 
   docker-build:
     name: Build Docker image
     needs: bootstrap
     runs-on: ubuntu-latest
     env:
+      ARTIFACT: image.tar.gz
       FILENAME: docker-image.tar
       IMAGE: matthiasbock/qemu-armhf-debian-base
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
 
-      - name: Retrieve working directory
+      - name: Retrieve artifact
         uses: actions/download-artifact@v2
         with:
           name: qemu-armhf-debian-base-workdir
-          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/${{ env.WORKDIR }}
+          path: ${{ github.workspace }}/images/qemu-armhf-debian-base/${{ env.ARTIFACT }}
+
+      - name: Unpack artifact
+        run: |
+          cd "$GITHUB_WORKSPACE/images/qemu-armhf-debian-base/"
+          sudo tar -xvzf {{ env.ARTIFACT }}
 
       - name: Build Docker image
         run: |
