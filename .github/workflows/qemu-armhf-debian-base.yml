@@ -115,7 +115,7 @@ jobs:
     env:
       ROOTFS_HANDLE: qemu-armhf-debian-base-rootfs
       ROOTFS_FILENAME: qemu-armhf-debian-base-rootfs.tar.gz
-      RELEASE_TAG: qemu-armhf-debian-base-${{ env.GITHUB_SHA }}
+      RELEASE_TAG: qemu-armhf-debian-base-${{ GITHUB_SHA }}
     steps:
       - name: Retrieve artifact
         uses: actions/download-artifact@v2
