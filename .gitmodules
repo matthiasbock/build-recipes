@@ -1,0 +1,3 @@
+[submodule "common/bash-container-api"]
+	path = common/bash-container-api
+	url = git@github.com:matthiasbock/bash-container-api.git
