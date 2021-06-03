@@ -14,3 +14,4 @@ for compiler in {{,arm-none-eabi-,arm-linux-gnueabi-}gcc,g++}; do
 	alias "$compiler"="ccache $compiler"
 done
 
+# TODO: Add ccache symlinks for all sorts of available compilers
