@@ -4,8 +4,19 @@
 # according to the parameters specified in config.sh.
 #
 
-cd $(realpath $(dirname "${BASH_SOURCE[0]}")) \
- || { echo "Failed to change to the folder containing this script. Aborting."; exit 1; }
+# Change to the folder containing this script
+scriptpath="$(pwd)"
+argc=${#BASH_SOURCE[@]}
+for argv in ${BASH_SOURCE}; do
+  if [[ "$argv" == *"build.sh"* ]]; then
+    scriptpath="$argv"
+    break
+  fi
+done
+test -f "${scriptpath}" \
+ || { echo "Script not found: $scriptpath. Aborting."; exit 1; }
+cd $(dirname $(realpath "$scriptpath")) \
+ || { echo "Failed to change to working directory. Aborting."; exit 1; }
 common="../../../common"
 
 # Include container management routines for bash
