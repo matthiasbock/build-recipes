@@ -9,15 +9,15 @@ name: qemu-armhf-debian-base
 # Control when the action will run
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
-  push:
-    branches:
-      - master
-    paths:
-      - '!.**'
-      - '!**'
-      - '.github/workflows/qemu-armhf-debian-base.yml'
-      - 'qemu-armhf-debian-base/**'
-      - 'images/qemu-armhf-debian-base/**'
+  # push:
+  #   branches:
+  #     - master
+  #   paths:
+  #     - '!.**'
+  #     - '!**'
+  #     - '.github/workflows/qemu-armhf-debian-base.yml'
+  #     - 'common/**'
+  #     - 'images/debian/armhf-qemu/**'
 
 #  pull_request:
 #    branches: [ master ]
