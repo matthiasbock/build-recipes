@@ -2,6 +2,9 @@
 # Derive container/image from this image
 export base_image="docker://debian:buster-slim"
 
+# Applies for base image and resulting container:
+export architecture="amd64"
+
 # Save container/image as
 export container_name="debian-base"
 export image_name="$container_name"

@@ -30,6 +30,7 @@ function constructor()
     -it \
     $container_networking \
 		--name "$container_name" \
+    --arch "$architecture" \
 		"$base_image"
 }
 create_container "$container_name" constructor \
@@ -91,12 +92,9 @@ $container_cli exec -it -u root "$container_name" bash -c \
 # most likely you don't have enough permission.
 
 # Install additional packages
-container_debian_install_package_bundles console-tools
+container_debian_install_package_bundles debian-essentials console-tools
 
 # Done
 #container_minimize "$container_name"
 echo "Successfully created container: $container_name."
 $container_cli stop "$container_name"
-
-# Commit as image
-#./commit.sh

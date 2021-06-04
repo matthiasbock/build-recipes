@@ -11,6 +11,9 @@ if ! container_exists "$container_name"; then
 	exit 1
 fi
 
+# TODO: Do a little cleanup beforehand?
+# apt-get -q clean
+# rm -fR /tmp; mkdir /tmp
+
 # Commit container as image
 container_commit "$container_name" "$image_name"
-
