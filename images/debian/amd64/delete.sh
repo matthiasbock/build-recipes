@@ -10,9 +10,9 @@ for argv in ${BASH_SOURCE}; do
   fi
 done
 test -f "${scriptpath}" \
- || { echo "Script not found: $scriptpath. Aborting."; exit 1; }
+ || { echo "Error: Script not found: $scriptpath. Aborting."; exit 1; }
 cd $(dirname $(realpath "$scriptpath")) \
- || { echo "Failed to change to working directory. Aborting."; exit 1; }
+ || { echo "Error: Failed to change to working directory. Aborting."; exit 1; }
 common="../../../common"
 
 # Include container management routines for bash

@@ -14,9 +14,9 @@ for argv in ${BASH_SOURCE}; do
   fi
 done
 test -f "${scriptpath}" \
- || { echo "Script not found: $scriptpath. Aborting."; exit 1; }
+ || { echo "Error: Script not found: $scriptpath. Aborting."; exit 1; }
 cd $(dirname $(realpath "$scriptpath")) \
- || { echo "Failed to change to working directory. Aborting."; exit 1; }
+ || { echo "Error: Failed to change to working directory. Aborting."; exit 1; }
 common="../../../common"
 
 # Include container management routines for bash
@@ -45,23 +45,23 @@ function constructor()
 		"$base_image"
 }
 create_container "$container_name" constructor \
- || { echo "Failed to create container. Aborting. "; exit 1; }
+ || { echo "Error: Failed to create container. Aborting. "; exit 1; }
 
 #
 # Work on the newly created container
 #
 echo "Starting container ..."
 container_start "$container_name" \
- || { echo "Unable to start newly created container. Aborting."; exit 1; }
+ || { echo "Error: Unable to start newly created container. Aborting."; exit 1; }
 container_set_hostname "$container_name" "$hostname" \
- || { echo "Failed to set hostname. Aborting."; exit 1; }
+ || { echo "Error: Failed to set hostname. Aborting."; exit 1; }
 
 #
 # Configure bash
 #
 echo "Creating new user $user ..."
 container_create_user "$container_name" "$user" \
- || { echo "Failed to create user. Aborting."; exit 1; }
+ || { echo "Error: Failed to create user. Aborting."; exit 1; }
 
 echo "Adding a .bashrc for root and $user ..."
 tmpfile=".bashrc"
@@ -86,12 +86,12 @@ for url in \
  "$package_pool/main/c/ca-certificates/ca-certificates_20200601~deb10u2_all.deb" \
  ; do
    container_debian_install_package_from_url "$container_name" "$url" \
-    || { echo "Failed to install packages required for secure package installation. Aborting."; exit 1; }
+    || { echo "Error: Failed to install packages required for secure package installation. Aborting."; exit 1; }
 done
 
 # Bootstrap using a trustworthy HTTPS package repository
 container_add_file "$container_name" root "$sources_list" "/etc/apt/sources.list" \
- || { echo "Failed to add apt sources.list required for further package installation. Aborting."; exit 1; }
+ || { echo "Error: Failed to add apt sources.list required for further package installation. Aborting."; exit 1; }
 $container_cli exec -it -u root "$container_name" bash -c \
  "apt-get -q update && apt-get -q install --reinstall -y ca-certificates debian-*keyring ubuntu-*keyring"
 

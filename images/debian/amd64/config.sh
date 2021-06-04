@@ -6,15 +6,17 @@ export base_image="docker://debian:buster-slim"
 export architecture="amd64"
 
 # Save container/image as
-export container_name="debian-base"
-export image_name="$container_name"
+export container_name="debian-base-amd64"
+export image_name="debian-base"
 
 # Container/image parameters
 export container_networking=""
 #   --pod "$pod"
 #		--net $net --network-alias $container_name
 export hostname="debian"
-#export package_pool="http://ftp.debian.org/debian/pool"
+
+# This pool is used before package verification using GPG is available.
+# Use a HTTPS package pool here to at least have transport encryption.
 export package_pool="https://ftp.gwdg.de/pub/linux/debian/debian/pool/"
 export sources_list="$common/sources.list.d/buster.list"
 
