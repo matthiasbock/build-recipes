@@ -1,0 +1,43 @@
+#
+# Creates a container image
+# with a Debian rootfs for 64-bit x86 (amd64)
+#
+
+name: debian-base-amd64
+
+
+# Control when the action will run
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches:
+      - master
+    paths:
+      - '!.**'
+      - '!**'
+      - '.github/workflows/debian-base-amd64.yml'
+      - 'common/**'
+      - 'images/debian/amd64/**'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    name: Build Debian container
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get -q update
+          sudo apt-get -q install -y dialog ca-certificates openssl
+          sudo apt-get -q update
+          sudo apt-get -q install -y ubuntu-*keyring debian-*keyring
+          apt-key list
+          sudo apt-get -q install -y coreutils podman
+
+      - name: Build container
+        run: ${{ github.workspace }}/images/debian/amd64/build.sh
