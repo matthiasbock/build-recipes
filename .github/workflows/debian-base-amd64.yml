@@ -43,3 +43,9 @@ jobs:
 
       - name: Build container
         run: ${{ github.workspace }}/images/debian/amd64/build.sh
+
+      - name: Create image from container
+        run: ${{ github.workspace }}/images/debian/amd64/commit.sh
+
+      - name: Publish image on Docker Hub
+        run: ${{ github.workspace }}/images/debian/amd64/publish-dockerhub.sh
