@@ -80,6 +80,7 @@ $container_cli exec -t "$container_name" mkdir -p /usr/share/man/man1/
 
 # Enable SSL certificate verification
 for url in \
+ "$package_pool/main/d/dialog/dialog_1.3-20190211-1_amd64.deb" \
  "$package_pool/main/o/openssl/libssl1.1_1.1.1d-0%2Bdeb10u6_amd64.deb" \
  "$package_pool/main/o/openssl/openssl_1.1.1d-0%2Bdeb10u6_amd64.deb" \
  "$package_pool/main/c/ca-certificates/ca-certificates_20200601~deb10u2_all.deb" \
