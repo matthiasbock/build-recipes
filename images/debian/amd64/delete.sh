@@ -1,10 +1,12 @@
 #!/bin/bash
 
-set -e
-cd $(dirname $0)
-source ../common/container.sh
-source include.sh
-set +e
+cd $(realpath $(dirname "${BASH_SOURCE[0]}"))
+common="../../../common"
 
-delete_container "$container_name"
+# Include container management routines for bash
+source "$common/bash-container-library/library.sh"
 
+# Include this script's runtime parameters
+source config.sh
+
+container_remove "$container_name"

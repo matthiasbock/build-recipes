@@ -1,95 +1,102 @@
 #!/bin/bash
+#
+# This script builds a container with a Debian GNU/Linux OS
+# according to the parameters specified in config.sh.
+#
 
-set -e
-cd "$(dirname $0)"
-source ../common/container.sh
+cd $(realpath $(dirname "${BASH_SOURCE[0]}")) \
+ || { echo "Failed to change to the folder containing this script. Aborting."; exit 1; }
+common="../../../common"
 
-source ../apt-cache/include.sh
-apt_cache_container="$container_name"
-apt_cache_volume="$volume_name"
+# Include container management routines for bash
+source "$common/bash-container-library/library.sh"
 
-# Build APT cache, if necessary
-../apt-cache/build.sh
-container_start "$apt_cache_container"
-../apt-cache/backup.sh
-
-# Artifacts directory
-source ../buildenv-base/include.sh
-
-# Source our the configuration last
-source include.sh
-#set +e
+# Include this script's runtime parameters
+source config.sh
 
 
+#
+# Create the container
+#
 if container_exists "$container_name"; then
 	echo "Container '$container_name' already exists. Skipping."
 	exit 0
 fi
 
-#
-# Create the container
-#
 function constructor()
 {
-	$cli create \
-		-it \
-		--pod "$pod" \
+  # Note: It is necessary to specify -it, otherwise the container will exit prematurely.
+	$container_cli create \
+    -it \
+    $container_networking \
 		--name "$container_name" \
-		-v "$apt_cache_volume:$apt_cache_dir" \
-		"$base_image" &> /dev/null
-
-#		--net $net \
-#		--network-alias $container_name \
+		"$base_image"
 }
-create_container "$container_name" constructor #|| exit 1
+create_container "$container_name" constructor \
+ || { echo "Failed to create container. Aborting. "; exit 1; }
 
+#
+# Work on the newly created container
+#
 echo "Starting container ..."
-container_start "$container_name" || exit 1
-container_set_hostname "$container_name" "$hostname"
+container_start "$container_name" \
+ || { echo "Unable to start newly created container. Aborting."; exit 1; }
+container_set_hostname "$container_name" "$hostname" \
+ || { echo "Failed to set hostname. Aborting."; exit 1; }
 
 #
 # Configure bash
 #
-echo "Configuring bash ..."
-$cli exec -it $container_name bash -c "mkdir -p /home/$user && useradd -d /home/$user -s /bin/bash $user"
+echo "Creating new user $user ..."
+container_create_user "$container_name" "$user" \
+ || { echo "Failed to create user. Aborting."; exit 1; }
+
+echo "Adding a .bashrc for root and $user ..."
 tmpfile=".bashrc"
-cat $common/shell/*.bashrc > $tmpfile
-$cli cp $tmpfile "$container_name:/root/"
-$cli cp $tmpfile "$container_name:/home/$user/"
-$cli exec -t "$container_name" bash -c "chown -R $user.$user /home/$user"
-rm $tmpfile
+cat $common/shell/*.bashrc > "$tmpfile"
+container_add_file "$container_name" "root" "$tmpfile" "/root/"
+container_add_file "$container_name" "$user" "$tmpfile" "/home/$user/"
+rm -f "$tmpfile"
 
 #
 # Configure APT
 #
 echo "Configuring APT ..."
-# Disable autoclean
-$cli exec -t "$container_name" rm /etc/apt/apt.conf.d/docker-clean
-# Use our config instead
-$cli cp apt.conf "$container_name:/etc/apt/"
-$cli exec -it "$container_name" bash -c "cd /var/lib/apt && rm -rf lists mirrors && rel=\"../apt-cache/apt\" && mkdir -p \$rel/lists \$rel/mirrors && ln \$rel/lists . -s && ln \$rel/mirrors . -s && cd /var/cache && rel=\"../lib/apt-cache\" && rm -fr apt && ln \$rel/apt . -s && mkdir -p /var/cache/apt/archives/partial"
-$cli exec -it "$container_name" bash -c "apt-get update && apt-get install -y apt-utils dialog ca-certificates apt-transport-https"
-$cli cp $common/sources.list.d/buster.list $container_name:/etc/apt/sources.list
-
-# TODO: console-tools
-$cli exec -it "$container_name" bash -c "apt-get update && apt-get install -y apt aptitude"
 
 # Workaround for installation problems (e.g. with openjdk-11-jdk)
-$cli exec -t "$container_name" mkdir -p /usr/share/man/man1/
+$container_cli exec -t "$container_name" mkdir -p /usr/share/man/man1/
 
-# Add mountpoint for artifacts volume
-$cli exec -t "$container_name" mkdir -p "$artifacts_dir"
+# Enable SSL certificate verification
+for url in \
+ "$package_pool/main/o/openssl/libssl1.1_1.1.1d-0%2Bdeb10u6_amd64.deb" \
+ "$package_pool/main/o/openssl/openssl_1.1.1d-0%2Bdeb10u6_amd64.deb" \
+ "$package_pool/main/c/ca-certificates/ca-certificates_20200601~deb10u2_all.deb" \
+ ; do
+   container_debian_install_package_from_url "$container_name" "$url" \
+    || { echo "Failed to install packages required for secure package installation. Aborting."; exit 1; }
+done
 
-#
+# Bootstrap using a trustworthy HTTPS package repository
+container_add_file "$container_name" root "$sources_list" "/etc/apt/sources.list" \
+ || { echo "Failed to add apt sources.list required for further package installation. Aborting."; exit 1; }
+$container_cli exec -it -u root "$container_name" bash -c \
+ "apt-get -q update && apt-get -q install --reinstall -y ca-certificates debian-*keyring ubuntu-*keyring"
+
+# Select fastest package repository
+#$container_cli exec -it -u root "$container_name" bash -c "apt-get -q update && apt-get -q install -y netselect-apt && netselect-apt -s"
+# TODO:
+# netselect: socket: Operation not permitted
+# You should be root to run netselect.
+# netselect was unable to operate successfully, please check the errors,
+# most likely you don't have enough permission.
+
 # Install additional packages
-#
-install_package_bundles $package_bundles
+container_debian_install_package_bundles console-tools
 
 # Done
-container_minimize "$container_name"
-echo "Successfully created container $container_name."
-$cli stop $container_name &> /dev/null
+#container_minimize "$container_name"
+echo "Successfully created container: $container_name."
+$container_cli stop "$container_name"
 
 # Commit as image
-./commit.sh
-
+#./commit.sh
