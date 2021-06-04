@@ -27,6 +27,6 @@ if ! image_exists "${image_name}:${image_tag}"; then
   exit 1
 fi
 
-# TODO: Log in to Docker Hub
+$container_cli login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_ACCESS_TOKEN docker.io
 
 $container_cli push "${image_name}:${image_tag}" "${dockerhub_repository}"
