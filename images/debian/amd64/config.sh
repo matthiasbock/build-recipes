@@ -14,11 +14,12 @@ export container_networking=""
 #   --pod "$pod"
 #		--net $net --network-alias $container_name
 export hostname="debian"
+export debian_release="buster"
 
 # This pool is used before package verification using GPG is available.
 # Use a HTTPS package pool here to at least have transport encryption.
 export package_pool="https://ftp.gwdg.de/pub/linux/debian/debian/pool/"
-export sources_list="$common/sources.list.d/buster.list"
+export sources_list="$common/sources.list.d/$debian_release.list"
 
 # A non-root user
 export user="runner"

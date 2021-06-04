@@ -1,19 +1,30 @@
 #!/bin/bash
 
-set -e
-cd "$(dirname $0)"
-source ../common/container.sh
-source include.sh
-set +e
+# Change to the folder containing this script
+scriptpath="$(pwd)"
+argc=${#BASH_SOURCE[@]}
+for argv in ${BASH_SOURCE}; do
+  if [[ "$argv" == *"commit.sh"* ]]; then
+    scriptpath="$argv"
+    break
+  fi
+done
+test -f "${scriptpath}" \
+ || { echo "Error: Script not found: $scriptpath. Aborting."; exit 1; }
+cd $(dirname $(realpath "$scriptpath")) \
+ || { echo "Error: Failed to change to working directory. Aborting."; exit 1; }
+common="../../../common"
 
-if ! container_exists "$container_name"; then
-	echo "Error: Unable to commit non-existent container '$container_name' ."
-	exit 1
-fi
+# Include container management routines for bash
+source "$common/bash-container-library/library.sh"
+
+# Include this script's runtime parameters
+source config.sh
+
 
 # TODO: Do a little cleanup beforehand?
 # apt-get -q clean
 # rm -fR /tmp; mkdir /tmp
 
 # Commit container as image
-container_commit "$container_name" "$image_name"
+container_commit "$container_name" "$image_name" "${debian_release}-${architecture}"
