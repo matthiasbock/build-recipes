@@ -4,7 +4,7 @@
 scriptpath="$(pwd)"
 argc=${#BASH_SOURCE[@]}
 for argv in ${BASH_SOURCE}; do
-  if [[ "$argv" == *"commit.sh"* ]]; then
+  if [[ "$argv" == *"publish-dockerhub.sh"* ]]; then
     scriptpath="$argv"
     break
   fi
@@ -22,9 +22,11 @@ source "$common/bash-container-library/library.sh"
 source config.sh
 
 
-# TODO: Do a little cleanup beforehand?
-# apt-get -q clean
-# rm -fR /tmp; mkdir /tmp
+if ! image_exists "${image_name}:${image_tag}"; then
+  echo "Fatal: Image '${image_name}:${image_tag}' not found."
+  exit 1
+fi
 
-# Commit container as image
-container_commit "$container_name" "$image_name" "$image_tag" "$image_config"
+# TODO: Log in to Docker Hub
+
+$container_cli push "${image_name}:${image_tag}" "${dockerhub_repository}"

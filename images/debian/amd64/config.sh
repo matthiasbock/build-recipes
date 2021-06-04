@@ -7,7 +7,6 @@ export architecture="amd64"
 
 # Save container/image as
 export container_name="debian-base-amd64"
-export image_name="debian-base"
 
 # Container/image parameters
 export container_networking=""
@@ -23,3 +22,9 @@ export sources_list="$common/sources.list.d/$debian_release.list"
 
 # A non-root user
 export user="runner"
+
+# Commit the result as image
+export image_name="debian-base"
+export image_tag="${debian_release}-${architecture}"
+export image_config="USER=runner WORKDIR=/home/runner ENTRYPOINT=/bin/bash"
+export dockerhub_repository="docker.io/matthiasbock/${image_name}:${image_tag}"
