@@ -45,10 +45,14 @@ function container_setup()
   echo "Adding a .bashrc for root and $user ..."
   tmpfile=".bashrc"
   cat $common/shell/*.bashrc > "$tmpfile"
-  container_add_file "$container_name" "$tmpfile" "/root/"
-  container_exec "$container_name" chown -R root.root /root/
-  container_add_file "$container_name" "$tmpfile" "/home/$user/"
-  container_exec "$container_name" chown -R ${user}.${user} "/home/$user/"
+  container_add_file "$container_name" "$tmpfile" "/root/" \
+   || { echo "Error: Failed to add bashrc for user root. Aborting."; exit 1; }
+  container_exec "$container_name" chown -R root.root /root/ \
+   || { echo "Error: Failed to change file ownership. Aborting."; exit 1; }
+  container_add_file "$container_name" "$tmpfile" "/home/$user/" \
+   || { echo "Error: Failed to add bashrc to user $user. Aborting."; exit 1; }
+  container_exec "$container_name" chown -R ${user}.${user} "/home/$user/" \
+   || { echo "Error: Failed to change file ownership. Aborting."; exit 1; }
   rm -f "$tmpfile"
 
   #
@@ -73,8 +77,9 @@ function container_setup()
   # Bootstrap using a trustworthy HTTPS package repository
   container_add_file "$container_name" root "$sources_list" "/etc/apt/sources.list" \
    || { echo "Error: Failed to add apt sources.list required for further package installation. Aborting."; exit 1; }
-  $container_cli exec -it -u root "$container_name" bash -c \
-   "apt-get -q update && apt-get -q install --reinstall -y ca-certificates debian-*keyring ubuntu-*keyring"
+  container_exec "$container_name" bash -c \
+   "apt-get -q update && apt-get -q install --reinstall -y ca-certificates debian-*keyring ubuntu-*keyring" \
+   || { echo "Error: Failed to install keyrings. Aborting."; exit 1; }
 
   # Select fastest package repository
   #$container_cli exec -it -u root "$container_name" bash -c "apt-get -q update && apt-get -q install -y netselect-apt && netselect-apt -s"
@@ -85,5 +90,6 @@ function container_setup()
   # most likely you don't have enough permission.
 
   # Install additional packages
-  container_debian_install_package_bundles debian-essentials console-tools
+  container_debian_install_package_bundles debian-essentials console-tools \
+   || { echo "Error: Failed to install packages. Aborting."; exit 1; }
 }

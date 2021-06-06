@@ -15,6 +15,11 @@ export dockerhub_repository="docker.io/matthiasbock/${image_name}:${image_tag}"
 
 function container_setup()
 {
-  container_set_hostname "$hostname"
-  container_debian_install_package_bundles keyrings debian-essentials console-tools version-control build-tools c
+  # Set hostname
+  container_set_hostname "$hostname" \
+   || { echo "Failed to set hostname. Aborting."; exit 1; }
+
+  # Install additional packages
+  container_debian_install_package_bundles keyrings debian-essentials console-tools version-control build-tools c \
+   || { echo "Failed to install packages. Aborting."; exit 1; }
 }

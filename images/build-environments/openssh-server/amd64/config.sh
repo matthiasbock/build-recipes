@@ -15,10 +15,21 @@ export dockerhub_repository="docker.io/matthiasbock/${image_name}:${image_tag}"
 
 function container_setup()
 {
-  container_set_hostname "$hostname"
-  container_add_file "$container_name" $(dirname $(realpath "${container_config}"))/run.sh /home/${user}/
-  container_exec "$container_name" chmod 755 /home/${user}/run.sh
-  container_exec "$container_name" chown -R ${user}.${user} /home/${user}
-  container_debian_install_build_dependencies "$container_name" openssh-server
-  container_debian_install_packages git ccache
+  # Set hostname
+  container_set_hostname "$hostname" \
+   || { echo "Failed to set hostname. Aborting."; exit 1; }
+
+  # apt build-dep
+  container_debian_install_build_dependencies "$container_name" openssh-server \
+   || { echo "Failed to install build dependencies. Aborting."; exit 1; }
+  container_debian_install_packages git ccache \
+   || { echo "Failed to install additional packages. Aborting."; exit 1; }
+
+  # run.sh
+  container_add_file "$container_name" $(dirname $(realpath "${container_config}"))/run.sh /home/${user}/ \
+   || { echo "Failed to add compilation script. Aborting."; exit 1; }
+  container_exec "$container_name" chmod 755 /home/${user}/run.sh \
+   || { echo "Failed to change file mode. Aborting."; exit 1; }
+  container_exec "$container_name" chown -R ${user}.${user} /home/${user} \
+   || { echo "Failed to change file ownership. Aborting."; exit 1; }
 }
