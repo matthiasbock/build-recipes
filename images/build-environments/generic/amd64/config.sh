@@ -1,7 +1,7 @@
 
 # Derive container/image from this image
 export base_image="docker.io/matthiasbock/debian-base:buster-amd64"
-export image_name="buildenv-base"
+export image_name="buildenv-generic"
 
 export architecture="amd64"
 export container_name="${image_name}-${architecture}"
