@@ -1,17 +1,17 @@
 
 # Derive container/image from this image
 export base_image="docker://debian:buster-slim"
+export image_name="debian-base"
 
-# Applies for base image and resulting container:
 export architecture="amd64"
-
-# Save container/image as
-export container_name="debian-base-amd64"
+export container_name="${image_name}-${architecture}"
 
 # Container/image parameters
 export container_networking=""
 #   --pod "$pod"
 #		--net $net --network-alias $container_name
+
+export user="runner"
 export hostname="debian"
 export debian_release="buster"
 
@@ -20,11 +20,7 @@ export debian_release="buster"
 export package_pool="https://ftp.gwdg.de/pub/linux/debian/debian/pool/"
 export sources_list="$common/sources.list.d/$debian_release.list"
 
-# A non-root user
-export user="runner"
-
 # Commit the result as image
-export image_name="debian-base"
 export image_tag="${debian_release}-${architecture}"
 export image_config="USER=${user} WORKDIR=/home/${user} ENTRYPOINT=/bin/bash"
 export dockerhub_repository="docker.io/matthiasbock/${image_name}:${image_tag}"
@@ -49,8 +45,10 @@ function container_setup()
   echo "Adding a .bashrc for root and $user ..."
   tmpfile=".bashrc"
   cat $common/shell/*.bashrc > "$tmpfile"
-  container_add_file "$container_name" "root" "$tmpfile" "/root/"
-  container_add_file "$container_name" "$user" "$tmpfile" "/home/$user/"
+  container_add_file "$container_name" "$tmpfile" "/root/"
+  container_exec "$container_name" chown -R root.root /root/
+  container_add_file "$container_name" "$tmpfile" "/home/$user/"
+  container_exec "$container_name" chown -R ${user}.${user} "/home/$user/"
   rm -f "$tmpfile"
 
   #
