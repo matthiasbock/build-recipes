@@ -13,13 +13,10 @@ test -f "${scriptpath}" \
  || { echo "Error: Script not found: $scriptpath. Aborting."; exit 1; }
 cd $(dirname $(realpath "$scriptpath")) \
  || { echo "Error: Failed to change to working directory. Aborting."; exit 1; }
-common="../../../common"
 
-# Include container management routines for bash
-source "$common/bash-container-library/library.sh"
-
-# Include this script's runtime parameters
-source config.sh
+# Prepare for script execution
+export container_config="$1"
+source "setup.sh"
 
 
 if ! image_exists "${image_name}:${image_tag}"; then
