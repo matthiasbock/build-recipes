@@ -16,14 +16,8 @@ export dockerhub_repository="docker.io/matthiasbock/${image_name}:${image_tag}"
 function container_setup()
 {
   # Set hostname
-  container_set_hostname "$hostname" \
+  container_set_hostname "$container_name" "$hostname" \
    || { echo "Failed to set hostname. Aborting."; exit 1; }
-
-  # apt build-dep
-  container_debian_install_build_dependencies "$container_name" openssh-server \
-   || { echo "Failed to install build dependencies. Aborting."; exit 1; }
-  container_debian_install_packages git ccache \
-   || { echo "Failed to install additional packages. Aborting."; exit 1; }
 
   # run.sh
   container_add_file "$container_name" $(dirname $(realpath "${container_config}"))/run.sh /home/${user}/ \
@@ -32,4 +26,10 @@ function container_setup()
    || { echo "Failed to change file mode. Aborting."; exit 1; }
   container_exec "$container_name" chown -R ${user}.${user} /home/${user} \
    || { echo "Failed to change file ownership. Aborting."; exit 1; }
+
+  # apt build-dep
+  container_debian_install_packages git ccache \
+   || { echo "Failed to install additional packages. Aborting."; exit 1; }
+  container_debian_install_build_dependencies "$container_name" openssh-server \
+   || { echo "Failed to install build dependencies. Aborting."; exit 1; }
 }

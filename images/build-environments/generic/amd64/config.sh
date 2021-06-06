@@ -16,7 +16,7 @@ export dockerhub_repository="docker.io/matthiasbock/${image_name}:${image_tag}"
 function container_setup()
 {
   # Set hostname
-  container_set_hostname "$hostname" \
+  container_set_hostname "$container_name" "$hostname" \
    || { echo "Failed to set hostname. Aborting."; exit 1; }
 
   # Install additional packages
