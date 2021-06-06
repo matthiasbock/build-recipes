@@ -1,5 +1,5 @@
 
-name: buildenv-base-amd64
+name: buildenv-generic-amd64
 
 on:
   push:
@@ -8,10 +8,13 @@ on:
     paths:
       - '!.**'
       - '!**'
-      - '.github/workflows/buildenv-base-amd64.yml'
+      - '.github/workflows/buildenv-generic-amd64.yml'
       - 'common/**'
-      - 'images/**.sh'
-      - 'images/build-environments/base/amd64/**'
+      - 'images/setup.sh'
+      - 'images/build.sh'
+      - 'images/commit.sh'
+      - 'images/publish-dockerhub.sh'
+      - 'images/build-environments/generic/amd64/**'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -21,7 +24,7 @@ jobs:
     name: Build image and publish on Docker Hub
     runs-on: ubuntu-latest
     env:
-      config: build-environments/base/amd64/config.sh
+      config: build-environments/generic/amd64/config.sh
     steps:
       - uses: actions/checkout@v2
         with:

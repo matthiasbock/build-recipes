@@ -17,7 +17,10 @@ on:
       - '!**'
       - '.github/workflows/debian-base-amd64.yml'
       - 'common/**'
-      - 'images/**.sh'
+      - 'images/setup.sh'
+      - 'images/build.sh'
+      - 'images/commit.sh'
+      - 'images/publish-dockerhub.sh'
       - 'images/debian/amd64/**'
 
   # Allows you to run this workflow manually from the Actions tab

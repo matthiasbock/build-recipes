@@ -10,7 +10,10 @@ on:
       - '!**'
       - '.github/workflows/buildenv-openssh-server-amd64.yml'
       - 'common/**'
-      - 'images/**.sh'
+      - 'images/setup.sh'
+      - 'images/build.sh'
+      - 'images/commit.sh'
+      - 'images/publish-dockerhub.sh'
       - 'images/build-environments/openssh-server/amd64/**'
 
   # Allows you to run this workflow manually from the Actions tab
