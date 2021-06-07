@@ -7,6 +7,8 @@ if [ "${container_config}" == "" ]; then
   echo "Argument required: Path to image configuration script. Aborting."
   exit 1
 fi
+
+# Verify, that file exists
 if [ ! -f "${container_config}" ]; then
   # Maybe the path was specified relative to the initial working directory
   container_config="${initial_pwd}/${container_config}"
@@ -15,6 +17,14 @@ if [ ! -f "${container_config}" ]; then
     exit 1
   fi
 fi
+
+# Use absolute path, if possible
+if [ -f "$(realpath ${container_config})" ]; then
+  container_config=$(realpath ${container_config})
+fi
+
+# Load configuration
+echo "Info: Using configuration file ${container_config}."
 source "${container_config}" \
  || { echo "Error: Failed to load container configuration. Aborting."; exit 1; }
 
