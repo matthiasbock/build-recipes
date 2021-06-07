@@ -5,7 +5,8 @@
 #
 
 # Change to the folder containing this script
-scriptpath="$(pwd)"
+export initial_pwd="$(pwd)"
+export scriptpath="$(pwd)"
 argc=${#BASH_SOURCE[@]}
 for argv in ${BASH_SOURCE}; do
   if [[ "$argv" == *"build.sh"* ]]; then

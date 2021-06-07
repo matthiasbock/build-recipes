@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Change to the folder containing this script
-scriptpath="$(pwd)"
+export initial_pwd="$(pwd)"
+export scriptpath="$(pwd)"
 argc=${#BASH_SOURCE[@]}
 for argv in ${BASH_SOURCE}; do
   if [[ "$argv" == *"publish-dockerhub.sh"* ]]; then
@@ -23,6 +24,8 @@ if ! image_exists "${image_name}:${image_tag}"; then
   echo "Fatal: Image '${image_name}:${image_tag}' not found."
   exit 1
 fi
+
+# TODO: Check: Are Docker Hub credentials defined?
 
 $container_cli login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_ACCESS_TOKEN docker.io
 
