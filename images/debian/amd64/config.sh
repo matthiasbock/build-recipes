@@ -89,6 +89,13 @@ function container_setup()
   # netselect was unable to operate successfully, please check the errors,
   # most likely you don't have enough permission.
 
+  # Prepare ccache folder
+  container_exec $container_name \
+    "mkdir -p /home/$user/.ccache && \
+     ln -s ../home/$user/.ccache /root/.ccache && \
+     chown $user.$user /home/$user/.ccache" \
+   || { echo "Error: Failed to create folders for ccache. Aborting."; exit 1; }
+
   # Install additional packages
   container_debian_install_package_bundles debian-essentials console-tools \
    || { echo "Error: Failed to install packages. Aborting."; exit 1; }
