@@ -1,6 +1,6 @@
 
 # Derive container/image from this image
-export base_image="docker://debian:buster-slim"
+export base_image="docker.io/debian:buster-slim"
 export image_name="debian-base"
 
 export architecture="amd64"
@@ -78,7 +78,7 @@ function container_setup()
   # Bootstrap using a trustworthy HTTPS package repository
   container_add_file $container_name "$sources_list" "/etc/apt/sources.list" \
    || { echo "Error: Failed to add apt sources.list required for further package installation. Aborting."; exit 1; }
-  container_exec "$container_name" bash -c \
+  container_exec $container_name \
    "apt-get -q update && apt-get -q install --reinstall -y ca-certificates debian-*keyring ubuntu-*keyring" \
    || { echo "Error: Failed to install keyrings. Aborting."; exit 1; }
 
