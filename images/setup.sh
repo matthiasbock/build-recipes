@@ -15,7 +15,9 @@ if [ ! -f "${container_config}" ]; then
     exit 1
   fi
 fi
-source "$container_config"
+source "${container_config}" \
+ || { echo "Error: Failed to load container configuration. Aborting."; exit 1; }
 
 # Include container management routines for bash
-source "$common/bash-container-library/library.sh"
+source "${common}/bash-container-library/library.sh" \
+ || { echo "Error: Failed to load bash container library. Aborting."; exit 1; }

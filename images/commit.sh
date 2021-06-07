@@ -17,7 +17,8 @@ cd $(dirname $(realpath "$scriptpath")) \
 
 # Prepare for script execution
 export container_config="$1"
-source "setup.sh"
+source "setup.sh" \
+ || { echo "Error: Failed to load setup script. Aborting."; exit 1; }
 
 
 # TODO: Do a little cleanup beforehand?
