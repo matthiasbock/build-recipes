@@ -32,26 +32,27 @@ function container_setup()
   #
   # Set hostname
   #
-  container_set_hostname "$container_name" "$hostname" \
+  container_set_hostname $container_name "$hostname" \
    || { echo "Error: Failed to set hostname. Aborting."; exit 1; }
 
   #
   # Configure bash
   #
   echo "Creating new user $user ..."
-  container_create_user "$container_name" "$user" \
+  container_create_user $container_name "$user" \
    || { echo "Error: Failed to create user. Aborting."; exit 1; }
 
   echo "Adding a .bashrc for root and $user ..."
+  set -x
   tmpfile=".bashrc"
   cat $common/shell/*.bashrc > "$tmpfile"
-  container_add_file "$container_name" "$tmpfile" "/root/" \
+  container_add_file $container_name "$tmpfile" "/root/" \
    || { echo "Error: Failed to add bashrc for user root. Aborting."; exit 1; }
-  container_exec "$container_name" chown -R root.root /root/ \
+  container_exec $container_name chown -R root.root /root/ \
    || { echo "Error: Failed to change file ownership. Aborting."; exit 1; }
-  container_add_file "$container_name" "$tmpfile" "/home/$user/" \
+  container_add_file $container_name "$tmpfile" "/home/$user/" \
    || { echo "Error: Failed to add bashrc to user $user. Aborting."; exit 1; }
-  container_exec "$container_name" chown -R ${user}.${user} "/home/$user/" \
+  container_exec $container_name chown -R ${user}.${user} "/home/$user/" \
    || { echo "Error: Failed to change file ownership. Aborting."; exit 1; }
   rm -f "$tmpfile"
 
@@ -61,7 +62,7 @@ function container_setup()
   echo "Configuring APT ..."
 
   # Workaround for installation problems (e.g. with openjdk-11-jdk)
-  $container_cli exec -t "$container_name" mkdir -p /usr/share/man/man1/
+  $container_cli exec -t $container_name mkdir -p /usr/share/man/man1/
 
   # Enable SSL certificate verification
   for url in \
@@ -70,19 +71,19 @@ function container_setup()
    "$package_pool/main/o/openssl/openssl_1.1.1d-0%2Bdeb10u6_amd64.deb" \
    "$package_pool/main/c/ca-certificates/ca-certificates_20200601~deb10u2_all.deb" \
    ; do
-     container_debian_install_package_from_url "$container_name" "$url" \
+     container_debian_install_package_from_url $container_name "$url" \
       || { echo "Error: Failed to install packages required for secure package installation. Aborting."; exit 1; }
   done
 
   # Bootstrap using a trustworthy HTTPS package repository
-  container_add_file "$container_name" root "$sources_list" "/etc/apt/sources.list" \
+  container_add_file $container_name "$sources_list" "/etc/apt/sources.list" \
    || { echo "Error: Failed to add apt sources.list required for further package installation. Aborting."; exit 1; }
   container_exec "$container_name" bash -c \
    "apt-get -q update && apt-get -q install --reinstall -y ca-certificates debian-*keyring ubuntu-*keyring" \
    || { echo "Error: Failed to install keyrings. Aborting."; exit 1; }
 
   # Select fastest package repository
-  #$container_cli exec -it -u root "$container_name" bash -c "apt-get -q update && apt-get -q install -y netselect-apt && netselect-apt -s"
+  #$container_cli exec -it -u root $container_name bash -c "apt-get -q update && apt-get -q install -y netselect-apt && netselect-apt -s"
   # TODO:
   # netselect: socket: Operation not permitted
   # You should be root to run netselect.
