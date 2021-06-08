@@ -44,7 +44,6 @@ function container_setup()
   # TODO: Add user to the list of sudoers
 
   echo "Adding a .bashrc for root and $user ..."
-  set -x
   tmpfile=".bashrc"
   cat $common/shell/*.bashrc > "$tmpfile"
   container_add_file $container_name "$tmpfile" "/root/" \
