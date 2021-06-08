@@ -1,10 +1,11 @@
 
 # Derive container/image from this image
-export base_image="docker.io/debian:buster-slim"
 export image_name="debian-base"
-
+export release="buster"
 export architecture="amd64"
-export container_name="${image_name}-${architecture}"
+export base_image="docker.io/debian:${release}-slim"
+export image_tag="${release}-${architecture}"
+export container_name="${image_name}-${image_tag}"
 
 # Container/image parameters
 export container_networking=""
@@ -13,16 +14,14 @@ export container_networking=""
 
 export user="runner"
 export hostname="debian"
-export debian_release="buster"
 
 # This pool is used before package verification using GPG is available.
 # Use a HTTPS package pool here to at least have transport encryption.
 export package_pool="https://ftp.gwdg.de/pub/linux/debian/debian/pool/"
-export sources_list="$common/sources.list.d/$debian_release.list"
+export sources_list="$common/sources.list.d/$release.list"
 
 # Commit the result as image
-export image_tag="${debian_release}-${architecture}"
-export image_config="USER=${user} WORKDIR=/home/${user} ENTRYPOINT=/bin/bash"
+export image_config="USER=${user} WORKDIR=/home/${user} ENTRYPOINT=['/bin/bash']"
 export dockerhub_repository="docker.io/matthiasbock/${image_name}:${image_tag}"
 
 
@@ -41,6 +40,8 @@ function container_setup()
   echo "Creating new user $user ..."
   container_create_user $container_name "$user" \
    || { echo "Error: Failed to create user. Aborting."; exit 1; }
+
+  # TODO: Add user to the list of sudoers
 
   echo "Adding a .bashrc for root and $user ..."
   set -x
@@ -84,7 +85,7 @@ function container_setup()
 
   # Select fastest package repository
   #$container_cli exec -it -u root $container_name bash -c "apt-get -q update && apt-get -q install -y netselect-apt && netselect-apt -s"
-  # TODO:
+  # TODO: netselect is not working from within the container
   # netselect: socket: Operation not permitted
   # You should be root to run netselect.
   # netselect was unable to operate successfully, please check the errors,
@@ -100,4 +101,7 @@ function container_setup()
   # Install additional packages
   container_debian_install_package_bundles debian-essentials console-tools \
    || { echo "Error: Failed to install packages. Aborting."; exit 1; }
+
+  # Cleanup
+  container_exec $container_name "rm -vfR /var/lib/apt/lists/* /var/cache/apt/archives/*.deb /usr/share/doc/*"
 }
