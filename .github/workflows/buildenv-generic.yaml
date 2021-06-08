@@ -1,27 +1,25 @@
 
-name: buildenv-generic-amd64
+name: buildenv-generic
 
 on:
   push:
-    branches:
-      - master
     paths:
       - '!.**'
       - '!**'
-      - '.github/workflows/buildenv-generic-amd64.yml'
+      - '.github/workflows/buildenv-generic.yml'
       - 'common/**'
       - 'images/setup.sh'
       - 'images/build.sh'
       - 'images/commit.sh'
       - 'images/publish-dockerhub.sh'
-      - 'images/build-environments/generic/amd64/**'
+      - 'images/build-environments/generic/**'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build image and publish on Docker Hub
+  build-amd64:
+    name: Build image and publish generic build environment for 64-it x86 ISA
     runs-on: ubuntu-latest
     env:
       config: build-environments/generic/amd64/config.sh

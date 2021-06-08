@@ -1,30 +1,28 @@
 
-name: buildenv-openssh-server-amd64
+name: buildenv-openssh
 
 on:
   push:
-    branches:
-      - master
     paths:
       - '!.**'
       - '!**'
-      - '.github/workflows/buildenv-openssh-server-amd64.yml'
+      - '.github/workflows/buildenv-openssh.yml'
       - 'common/**'
       - 'images/setup.sh'
       - 'images/build.sh'
       - 'images/commit.sh'
       - 'images/publish-dockerhub.sh'
-      - 'images/build-environments/openssh-server/amd64/**'
+      - 'images/build-environments/openssh/**'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build image and publish on Docker Hub
+  build-amd64:
+    name: Build environment for amd64
     runs-on: ubuntu-latest
     env:
-      config: build-environments/openssh-server/amd64/config.sh
+      config: build-environments/openssh/amd64/config.sh
     steps:
       - uses: actions/checkout@v2
         with:

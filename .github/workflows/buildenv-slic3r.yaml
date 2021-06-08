@@ -3,8 +3,6 @@ name: buildenv-slic3r
 
 on:
   push:
-    branches:
-      - master
     paths:
       - '!.**'
       - '!**'
