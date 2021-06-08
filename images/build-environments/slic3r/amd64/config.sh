@@ -32,7 +32,7 @@ function container_setup()
     git subversion cvs \
     build-essential cmake ccache tcl \
     perl liblocal-lib-perl cpanminus \
-    libxmu-dev freeglut3-dev libwxgtk-media2.8-dev \
+    libxmu-dev freeglut3-dev libwxgtk-media3.0-dev \
     libboost-thread-dev libboost-system-dev libboost-filesystem-dev \
    || { echo "Failed to install additional packages. Aborting."; exit 1; }
   container_debian_install_build_dependencies $container_name slic3r \
