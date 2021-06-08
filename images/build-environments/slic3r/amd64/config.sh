@@ -28,7 +28,12 @@ function container_setup()
    || { echo "Failed to change file ownership. Aborting."; exit 1; }
 
   # apt build-dep
-  container_debian_install_packages git subversion ccache \
+  container_debian_install_packages \
+    git subversion cvs \
+    build-essential cmake ccache tcl \
+    perl liblocal-lib-perl cpanminus \
+    libxmu-dev freeglut3-dev libwxgtk-media2.8-dev \
+    libboost-thread-dev libboost-system-dev libboost-filesystem-dev \
    || { echo "Failed to install additional packages. Aborting."; exit 1; }
   container_debian_install_build_dependencies $container_name slic3r \
    || { echo "Failed to install build dependencies. Aborting."; exit 1; }
