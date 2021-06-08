@@ -39,5 +39,5 @@ function container_setup()
    || { echo "Failed to install build dependencies. Aborting."; exit 1; }
 
   # Cleanup
-  container_exec $container_name "rm -vfR /var/lib/apt/lists/* /var/cache/apt/archives/*.deb /usr/share/doc/*"
+  container_exec $container_name "rm -vfR /var/lib/apt/lists/* /var/cache/apt/archives/*.deb /usr/share/doc/* /usr/share/man/*"
 }
