@@ -9,7 +9,7 @@ export container_name="${image_name}-${image_tag}"
 export user="runner"
 export hostname="${image_name}"
 
-export image_config="USER=${user} WORKDIR=/home/${user} ENTRYPOINT=['/bin/bash']"
+export image_config="USER=${user} WORKDIR=/home/${user} ENTRYPOINT=/bin/bash"
 export dockerhub_repository="docker.io/matthiasbock/${image_name}:${image_tag}"
 
 
