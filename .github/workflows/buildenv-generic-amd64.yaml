@@ -30,15 +30,6 @@ jobs:
         with:
           submodules: true
 
-      - name: Install build dependencies
-        run: |
-          sudo apt-get -q update
-          sudo apt-get -q install -y dialog ca-certificates openssl
-          sudo apt-get -q update
-          sudo apt-get -q install -y ubuntu-*keyring debian-*keyring
-          apt-key list
-          sudo apt-get -q install -y coreutils podman
-
       - name: Build container
         run: ${{ github.workspace }}/images/build.sh ${{ env.config }}
 
