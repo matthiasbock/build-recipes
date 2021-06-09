@@ -33,6 +33,7 @@ function container_setup()
   container_debian_install_build_dependencies $container_name openssh-{server,client,sftp-server,tests} \
    || { echo "Failed to install build dependencies. Aborting."; exit 1; }
 
-  # Cleanup
-  container_exec $container_name "rm -vfR /var/lib/apt/lists/* /var/cache/apt/archives/*.deb /usr/share/doc/* /usr/share/man/*"
+  # Clean up
+  container_expendables_import "${bash_container_library}/expendables.list"
+  container_cleanup $container_name
 }

@@ -23,6 +23,7 @@ function container_setup()
   container_debian_install_package_bundles keyrings debian-essentials console-tools version-control build-tools c \
    || { echo "Failed to install packages. Aborting."; exit 1; }
 
-  # Cleanup
-  container_exec $container_name "rm -vfR /var/lib/apt/lists/* /var/cache/apt/archives/*.deb /usr/share/doc/* /usr/share/man/*"
+  # Clean up
+  container_expendables_import "${bash_container_library}/expendables.list"
+  container_cleanup $container_name
 }
