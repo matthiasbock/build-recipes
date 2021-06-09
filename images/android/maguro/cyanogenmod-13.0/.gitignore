@@ -1,0 +1,13 @@
+
+cm*.zip
+
+*.img
+*.dat
+
+boot
+*.cfg
+zImage
+initrd*
+
+image/
+system/
