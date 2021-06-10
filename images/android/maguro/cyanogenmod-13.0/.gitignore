@@ -2,7 +2,10 @@
 cm*.zip
 
 *.img
-*.dat
+*.new.dat
+*.transfer.list
+
+sdat2img*
 
 boot
 *.cfg

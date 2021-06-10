@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 zip_local="cm-13.0-20161219-NIGHTLY-maguro.zip"
 zip_online="https://cyanogenmodroms.com/link/cm-13-0-20161219-nightly-maguro-zip"
 verify_md5="00c135c65217357f97eb8d489de0fe20"
@@ -12,56 +14,104 @@ if [ ! -e "$zip_local" ]; then
   wget -c -O "$zip_local" "$zip_online"
 fi
 
-# Verify image integrity
-echo "Verifying image integrity..."
-md5=$(md5sum "$zip_local" | cut -d " " -f 1)
-if [ "$md5" != "$verify_md5" ]; then
-  echo "md5sum is $md5, expected $verify_md5."
-  echo "Error: File integrity verification failed. Aborting."
-  exit 1
-fi
-sha256=$(sha256sum "$zip_local" | cut -d " " -f 1)
-if [ "$sha256" != "$verify_sha256" ]; then
-  echo "sha256sum is $sha256, expected $verify_sha256."
-  echo "Error: File integrity verification failed. Aborting."
-  exit 1
-fi
-echo "Verification successful."
+function verify_image_integrity()
+{
+  echo "Verifying image integrity..."
+  md5=$(md5sum "$zip_local" | cut -d " " -f 1)
+  if [ "$md5" != "$verify_md5" ]; then
+    echo "md5sum is $md5, expected $verify_md5."
+    echo "Error: File integrity verification failed. Aborting."
+    exit 1
+  fi
+  sha256=$(sha256sum "$zip_local" | cut -d " " -f 1)
+  if [ "$sha256" != "$verify_sha256" ]; then
+    echo "sha256sum is $sha256, expected $verify_sha256."
+    echo "Error: File integrity verification failed. Aborting."
+    exit 1
+  fi
+  echo "Verification successful."
+}
 
-# Unpack ROM archive
-echo "Extracting partitions..."
-unzip -oq "$zip_local" boot.img system.new.dat \
-  || { echo "An error occured while unpacking the ROM. Aborting."; exit 1; }
-echo "ROM unpacked."
+function unpack_boot_partition()
+{
+  echo "Extracting boot partition..."
+  unzip -o "$zip_local" boot.img \
+    || { echo "An error occured while unpacking the ROM. Aborting."; exit 1; }
+  echo "ROM unpacked."
 
-# Unpack boot image
-echo "Unpacking boot image..."
-abootimg -x boot.img \
-  || { echo "Error: Failed to unpack boot partition. Aborting."; exit 1; }
-rm boot.img
+  # Unpack boot image
+  echo "Unpacking boot image..."
+  abootimg -x boot.img \
+    || { echo "Error: Failed to unpack boot partition. Aborting."; exit 1; }
+  rm boot.img
 
-# Mount system image
-echo "Mounting system image..."
-mkdir system || sudo umount -f system
-# EXT4-fs (loop0): bad geometry: block count 167424 exceeds size of device (128446 blocks)
-sudo dd if=/dev/zero of=system.new.dat bs=4096 seek=167424 count=1
-sudo losetup -d /dev/loop0
-sleep 1
-sudo losetup /dev/loop0 system.new.dat
-#sudo fsck.ext2 -y /dev/loop0
-sudo mount -t ext4 -o ro,seclabel,relatime,user_xattr,barrier=1 /dev/loop0 system \
-  || { echo "Error: Failed to mount system partition. Aborting."; exit 1; }
+  echo "Done."
+}
 
-# Create an image folder from initial ramdisk
+function extract_system_partition()
+{
+  echo "Extracting system partition..."
+  unzip -o "$zip_local" system.new.dat system.transfer.list \
+    || { echo "An error occured while unpacking the ROM. Aborting."; exit 1; }
+  echo "ROM unpacked."
+
+  echo "Unpacking system image..."
+  if [ ! -e sdat2img ]; then
+    git clone https://github.com/xpirt/sdat2img.git
+    #git checkout 1b08432247fce8037fd6a43685c6e7037a2e553a
+    chmod +x sdat2img/sdat2img.py
+  fi
+  sdat2img/sdat2img.py system.transfer.list system.new.dat system.img \
+    && rm system.transfer.list system.new.dat
+
+  echo "Done."
+}
+
+function is_active_mountpoint()
+{
+  local mountpoint="$1"
+  if [ "$(mount | fgrep $mountpoint)" != "" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+function unpack_system_partition()
+{
+  extract_system_partition
+
+  echo "Unpacking system partition..."
+  if [ ! -d system ]; then
+    mkdir system
+  fi
+  if is_active_mountpoint "$(realpath system)"; then
+    sudo umount -f system
+  fi
+  sudo mount -t ext4 -o loop,ro,seclabel,relatime,user_xattr,barrier=1 system.img system \
+    || { echo "Error: Failed to mount system partition. Aborting."; exit 1; }
+  sudo rsync -ariHS system image/
+  sudo umount -d system
+  rm system.img
+
+  echo "Done."
+}
+
+
+#verify_image_integrity
+
 echo "Creating container image..."
-rm -fR image; mkdir -p image/boot/
+sudo rm -fR image; mkdir -p image/boot/
 
-# Move kernel and boot image config to the image
-mv -v zImage bootimg.cfg image/boot/
-cp -av initrd.img image/boot/
+unpack_system_partition
+unpack_boot_partition
 
 # Extract initial ramdisk to image
 echo "Extracting initial ramdisk..."
-mv initrd.img initrd.img.gz && gzip -d initrd.img.gz
-cpio -vud --sparse -D image/ --extract < initrd.img
+mv initrd.img initrd.img.gz
+gzip -d initrd.img.gz
+sudo cpio -vud --sparse -D image/ --extract < initrd.img
 echo "Done."
+
+# Add kernel and initial ramdisk to image
+mv -v zImage initrd.img bootimg.cfg image/boot/
