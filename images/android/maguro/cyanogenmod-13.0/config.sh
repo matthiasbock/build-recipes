@@ -1,31 +1,41 @@
 #!/bin/bash
 
-set -e
+#
+# Source
+#
+rom_local="cm-13.0-20161219-NIGHTLY-maguro.zip"
+rom_url="https://cyanogenmodroms.com/link/cm-13-0-20161219-nightly-maguro-zip"
+rom_md5sum="00c135c65217357f97eb8d489de0fe20"
+rom_sha256sum="8014524ee401f4ff36d4d0cc74e49149d01c47ced5ea137c01cf32e25a05c374"
 
-zip_local="cm-13.0-20161219-NIGHTLY-maguro.zip"
-zip_online="https://cyanogenmodroms.com/link/cm-13-0-20161219-nightly-maguro-zip"
-verify_md5="00c135c65217357f97eb8d489de0fe20"
-verify_sha256="8014524ee401f4ff36d4d0cc74e49149d01c47ced5ea137c01cf32e25a05c374"
+#
+# Tools
+#
+sdat2img="$common/sdat2img/sdat2img.py"
+chmod +x $sdat2img
+#verify_md5sum 1bbe2e2a5aa7d9fd5c55e60331f705f4 "$sdat2img"
 
-
-# Retrieve ROM archive
-if [ ! -e "$zip_local" ]; then
-  export zip_local=$(basename "$zip_local")
-  wget -c -O "$zip_local" "$zip_online"
-fi
+function fetch_rom()
+{
+  # Retrieve ROM archive
+  if [ ! -e "$rom_local" ]; then
+    export rom_local=$(basename "$rom_local")
+    wget -c -O "$rom_local" "$rom_url"
+  fi
+}
 
 function verify_image_integrity()
 {
   echo "Verifying image integrity..."
-  md5=$(md5sum "$zip_local" | cut -d " " -f 1)
-  if [ "$md5" != "$verify_md5" ]; then
-    echo "md5sum is $md5, expected $verify_md5."
+  md5=$(md5sum "$rom_local" | cut -d " " -f 1)
+  if [ "$md5" != "$rom_md5sum" ]; then
+    echo "md5sum is $md5, expected $rom_md5sum."
     echo "Error: File integrity verification failed. Aborting."
     exit 1
   fi
-  sha256=$(sha256sum "$zip_local" | cut -d " " -f 1)
-  if [ "$sha256" != "$verify_sha256" ]; then
-    echo "sha256sum is $sha256, expected $verify_sha256."
+  sha256=$(sha256sum "$rom_local" | cut -d " " -f 1)
+  if [ "$sha256" != "$rom_sha256sum" ]; then
+    echo "sha256sum is $sha256, expected $rom_sha256sum."
     echo "Error: File integrity verification failed. Aborting."
     exit 1
   fi
@@ -35,7 +45,7 @@ function verify_image_integrity()
 function unpack_boot_partition()
 {
   echo "Extracting boot partition..."
-  unzip -o "$zip_local" boot.img \
+  unzip -o "$rom_local" boot.img \
     || { echo "An error occured while unpacking the ROM. Aborting."; exit 1; }
   echo "ROM unpacked."
 
@@ -44,25 +54,6 @@ function unpack_boot_partition()
   abootimg -x boot.img \
     || { echo "Error: Failed to unpack boot partition. Aborting."; exit 1; }
   rm boot.img
-
-  echo "Done."
-}
-
-function extract_system_partition()
-{
-  echo "Extracting system partition..."
-  unzip -o "$zip_local" system.new.dat system.transfer.list \
-    || { echo "An error occured while unpacking the ROM. Aborting."; exit 1; }
-  echo "ROM unpacked."
-
-  echo "Unpacking system image..."
-  if [ ! -e sdat2img ]; then
-    git clone https://github.com/xpirt/sdat2img.git
-    #git checkout 1b08432247fce8037fd6a43685c6e7037a2e553a
-    chmod +x sdat2img/sdat2img.py
-  fi
-  sdat2img/sdat2img.py system.transfer.list system.new.dat system.img \
-    && rm system.transfer.list system.new.dat
 
   echo "Done."
 }
@@ -79,12 +70,20 @@ function is_active_mountpoint()
 
 function unpack_system_partition()
 {
-  extract_system_partition
+  echo "Extracting system partition from ROM..."
+  unzip -o "$rom_local" system.new.dat system.transfer.list \
+    || { echo "An error occured while unpacking the ROM. Aborting."; exit 1; }
+  echo "ROM unpacked."
 
-  echo "Unpacking system partition..."
+  echo "Unpacking system image..."
+  $sdat2img system.transfer.list system.new.dat system.img
+  rm -v system.transfer.list system.new.dat
+
+  echo "Unpacking system image..."
   if [ ! -d system ]; then
     mkdir system
   fi
+  set -x
   if is_active_mountpoint "$(realpath system)"; then
     sudo umount -f system
   fi
@@ -92,26 +91,42 @@ function unpack_system_partition()
     || { echo "Error: Failed to mount system partition. Aborting."; exit 1; }
   sudo rsync -ariHS system image/
   sudo umount -d system
+  set +x
+  rmdir system
   rm system.img
 
   echo "Done."
 }
 
+function mkimage()
+{
+  set -e
 
-#verify_image_integrity
+  fetch_rom
+  verify_image_integrity
 
-echo "Creating container image..."
-sudo rm -fR image; mkdir -p image/boot/
+  echo "Creating container image..."
+  mkdir -p image/boot/
 
-unpack_system_partition
-unpack_boot_partition
+  unpack_system_partition
+  unpack_boot_partition
 
-# Extract initial ramdisk to image
-echo "Extracting initial ramdisk..."
-mv initrd.img initrd.img.gz
-gzip -d initrd.img.gz
-sudo cpio -vud --sparse -D image/ --extract < initrd.img
-echo "Done."
+  # Extract initial ramdisk to image
+  echo "Extracting initial ramdisk..."
+  mv initrd.img initrd.img.gz
+  gzip -d initrd.img.gz
+  sudo cpio -vud --sparse -D image/ --extract < initrd.img
+  echo "Done."
 
-# Add kernel and initial ramdisk to image
-mv -v zImage initrd.img bootimg.cfg image/boot/
+  # Add kernel and initial ramdisk to image
+  mv -v zImage initrd.img bootimg.cfg image/boot/
+
+  set +e
+}
+
+function container_setup()
+{
+  mkimage
+
+  # TODO: Copy all files into the container
+}
