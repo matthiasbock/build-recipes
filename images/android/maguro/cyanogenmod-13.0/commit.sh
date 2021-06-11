@@ -3,9 +3,5 @@
 export common="../../../../common"
 source config.sh
 
-
-# Import folder as new image
-COMMIT_ID=$(tar -cf - | podman import - android-maguro)
-
-# Tag new image as configured
-podman tag "$COMMIT_ID" "$image_name:$image_tag"
+dir="image"
+image_create_from_folder $dir "matthiasbock/$image_name:$image_tag"

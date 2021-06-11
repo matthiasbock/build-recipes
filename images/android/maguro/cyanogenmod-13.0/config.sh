@@ -118,6 +118,7 @@ function mkimage()
   verify_image_integrity
 
   echo "Creating container image..."
+  if [ -d image ]; then sudo rm -vfR image/; fi
   mkdir -p image/boot/
 
   unpack_system_partition
