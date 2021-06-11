@@ -7,12 +7,12 @@ on:
       - '!.**'
       - '!**'
       - '.github/workflows/buildenv-slic3r.yml'
-      - 'common/**'
-      - 'images/setup.sh'
-      - 'images/build.sh'
-      - 'images/commit.sh'
-      - 'images/publish-dockerhub.sh'
       - 'images/build-environments/slic3r/**'
+      # - 'common/**'
+      # - 'images/setup.sh'
+      # - 'images/build.sh'
+      # - 'images/commit.sh'
+      # - 'images/publish-dockerhub.sh'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
