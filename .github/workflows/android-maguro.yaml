@@ -30,6 +30,14 @@ jobs:
         with:
           submodules: true
 
+      - name: Install build dependencies
+        run: |
+          sudo apt-get -q update
+          sudo apt-get -q install -y ubuntu-*keyring debian-*keyring ca-certificates
+          apt-key list
+          sudo apt-get -q update
+          sudo apt-get -q install -y abootimg
+
       - name: Build container
         run: |
           cd "${{ env.workdir }}"
