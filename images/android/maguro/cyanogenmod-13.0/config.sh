@@ -4,7 +4,8 @@
 # Source
 #
 export rom_local="cm-13.0-20161219-NIGHTLY-maguro.zip"
-export rom_url="https://cyanogenmodroms.com/link/cm-13-0-20161219-nightly-maguro-zip"
+#export rom_url="https://cyanogenmodroms.com/link/cm-13-0-20161219-nightly-maguro-zip"
+export rom_url="https://github.com/matthiasbock/android-images/releases/download/maguro-cm13/cm-13.0-20161219-NIGHTLY-maguro.zip"
 export rom_md5sum="00c135c65217357f97eb8d489de0fe20"
 export rom_sha256sum="8014524ee401f4ff36d4d0cc74e49149d01c47ced5ea137c01cf32e25a05c374"
 
