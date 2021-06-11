@@ -36,7 +36,7 @@ jobs:
           sudo apt-get -q install -y ubuntu-*keyring debian-*keyring ca-certificates
           apt-key list
           sudo apt-get -q update
-          sudo apt-get -q install -y abootimg
+          sudo apt-get -q install -y abootimg qemu-user-static
 
       - name: Build container
         run: |

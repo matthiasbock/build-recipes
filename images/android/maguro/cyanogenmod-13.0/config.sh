@@ -135,6 +135,9 @@ function mkimage()
   # Add kernel and initial ramdisk to image
   mv -v zImage initrd.img bootimg.cfg image/boot/
 
+  # Add qemu
+  cp -av $(which qemu-arm-static) image/
+
   set +e
 }
 
