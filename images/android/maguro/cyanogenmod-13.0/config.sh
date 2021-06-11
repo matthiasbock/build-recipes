@@ -32,7 +32,7 @@ function fetch_rom()
   # Retrieve ROM archive
   if [ ! -e "$rom_local" ]; then
     export rom_local=$(basename "$rom_local")
-    wget -c -O "$rom_local" "$rom_url"
+    wget -c --progress=dot:giga -O "$rom_local" "$rom_url"
   fi
 }
 
