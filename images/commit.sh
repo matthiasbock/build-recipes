@@ -21,9 +21,16 @@ source "setup.sh" \
  || { echo "Error: Failed to load setup script. Aborting."; exit 1; }
 
 
+if [ $(type -t pre_commit_hook) == "function" ]; then
+  pre_commit_hook
+fi
+
 # TODO: Do a little cleanup beforehand?
 # apt-get -q clean
 # rm -fR /tmp; mkdir /tmp
 
 # Commit container as image
-container_commit "$container_name" "$image_name" "$image_tag" "$image_config"
+echo "Committing..."
+container_commit "$container_name" "$image_name" "$image_tag" "$image_config" \
+ || { echo "Error: Image creation failed. Aborting."; exit 1; }
+echo "Image creation complete."
