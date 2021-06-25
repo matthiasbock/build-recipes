@@ -17,7 +17,7 @@ export codename="maguro"
 export release="cm13"
 export image_tag="${codename}-${release}"
 export container_name="${image_name}-${image_tag}"
-export image_config="USER=root WORKDIR=/"
+export image_config="USER=root WORKDIR=/ CMD=['/qemu-arm-static','/system/bin/sh']"
 export dockerhub_repository="docker.io/matthiasbock/${image_name}:${image_tag}"
 
 #
