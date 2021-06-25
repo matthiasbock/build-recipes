@@ -21,7 +21,7 @@ export package_pool="https://ftp.gwdg.de/pub/linux/debian/debian/pool/"
 export sources_list="$common/sources.list.d/$release.list"
 
 # Commit the result as image
-export image_config="USER=${user} WORKDIR=/home/${user} ENTRYPOINT=/bin/bash"
+export image_config="USER=${user} WORKDIR=/home/${user} CMD=/bin/bash"
 export dockerhub_repository="docker.io/matthiasbock/${image_name}:${image_tag}"
 
 
