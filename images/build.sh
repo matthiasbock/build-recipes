@@ -33,17 +33,7 @@ if container_exists "$container_name"; then
 	exit 0
 fi
 
-function constructor()
-{
-  # Note: It is necessary to specify -it, otherwise the container will exit prematurely.
-	$container_cli create \
-    -it \
-    $container_networking \
-		--name "$container_name" \
-    --arch "$architecture" \
-		"$base_image"
-}
-create_container "$container_name" constructor \
+create_container "$container_name" $container_constructor \
  || { echo "Error: Failed to create container. Aborting. "; exit 1; }
 
 #
