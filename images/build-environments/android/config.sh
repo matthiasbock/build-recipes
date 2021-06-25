@@ -24,13 +24,13 @@ function container_setup_failed()
 function container_setup()
 {
   # Install/Uninstall packages
-  container_exec $container_name apt-get update \
+  container_exec $container_name apt-get -q update \
     || { echo "Failed to update package list. Aborting."; container_setup_failed; exit 1; }
 #  container_exec $container_name apt-get upgrade -y \
 #    || { echo "Failed to upgrade packages. Aborting."; container_setup_failed; exit 1; }
-  container_exec $container_name apt-get remove -y $(cat "$container_config_dir/uninstall.list" | sed -ze "s/\n/ /g") \
+  container_exec $container_name apt-get -q remove -y $(cat "$container_config_dir/uninstall.list" | sed -ze "s/\n/ /g") \
     || { echo "Failed to remove packages. Aborting."; container_setup_failed; exit 1; }
-  container_exec $container_name apt-get install -y $(cat "$container_config_dir/install.list" | sed -ze "s/\n/ /g") \
+  container_exec $container_name apt-get -q install -y $(cat "$container_config_dir/install.list" | sed -ze "s/\n/ /g") \
     || { echo "Failed to install packages. Aborting."; container_setup_failed; exit 1; }
 
  #container_exec $container_name apt-mark hold $(cat "$container_config_dir/mark-hold.list" | sed -ze "s/\n/ /g") \
