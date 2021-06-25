@@ -1,13 +1,13 @@
 
-name: android-maguro
+name: testenv-android-maguro
 
 on:
   push:
     paths:
       - '!.**'
       - '!**'
-      - '.github/workflows/android-maguro.yml'
-      - 'images/android/maguro/**'
+      - '.github/workflows/testenv-android-maguro.yml'
+      - 'images/test-environments/android/maguro/**'
       # - 'common/**'
       # - 'images/setup.sh'
       # - 'images/build.sh'
@@ -23,8 +23,8 @@ jobs:
     name: Build image and publish
     runs-on: ubuntu-latest
     env:
-      workdir: ${{ github.workspace }}/images/android/maguro/cyanogenmod-13.0
-      config: android/maguro/cyanogenmod-13.0/config.sh
+      workdir: ${{ github.workspace }}/images/test-environments/android/maguro/cyanogenmod-13.0
+      config: test-environments/android/maguro/cyanogenmod-13.0/config.sh
     steps:
       - uses: actions/checkout@v2
         with:
