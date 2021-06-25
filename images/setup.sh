@@ -22,6 +22,7 @@ fi
 if [ -f "$(realpath ${container_config})" ]; then
   container_config=$(realpath ${container_config})
 fi
+export container_config_dir=$(dirname $container_config)
 
 # Load configuration
 echo "Info: Using configuration file ${container_config}."
