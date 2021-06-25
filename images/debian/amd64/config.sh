@@ -78,8 +78,8 @@ function container_setup()
   # Bootstrap using a trustworthy HTTPS package repository
   container_add_file $container_name "$sources_list" "/etc/apt/sources.list" \
    || { echo "Error: Failed to add apt sources.list required for further package installation. Aborting."; exit 1; }
-  container_exec $container_name \
-   "apt-get -q update && apt-get -q install --reinstall -y ca-certificates debian-*keyring ubuntu-*keyring" \
+  container_exec $container_name apt-get -q update
+  container_exec $container_name apt-get -q install --reinstall -y ca-certificates debian-*keyring ubuntu-*keyring \
    || { echo "Error: Failed to install keyrings. Aborting."; exit 1; }
 
   # Select fastest package repository
@@ -91,17 +91,15 @@ function container_setup()
   # most likely you don't have enough permission.
 
   # Prepare ccache folder
-  container_exec $container_name \
-    "mkdir -p /home/$user/.ccache && \
-     ln -s ../home/$user/.ccache /root/.ccache && \
-     chown $user.$user /home/$user/.ccache" \
-   || { echo "Error: Failed to create folders for ccache. Aborting."; exit 1; }
+  container_exec $container_name mkdir -p /home/$user/.ccache
+  container_exec $container_name ln -s ../home/$user/.ccache /root/.ccache
+  container_exec $container_name chown $user.$user /home/$user/.ccache
 
   # Install additional packages
   container_debian_install_package_bundles debian-essentials console-tools \
    || { echo "Error: Failed to install packages. Aborting."; exit 1; }
 
   # Clean up
-  container_expendables_import "${bash_container_library}/expendables.list"
+  container_expendables_import "${bash_container_library}/expendables/default.list"
   container_cleanup $container_name
 }
