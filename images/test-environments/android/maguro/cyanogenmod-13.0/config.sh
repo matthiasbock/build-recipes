@@ -27,6 +27,14 @@ export sdat2img="$common/sdat2img/sdat2img.py"
 chmod +x $sdat2img
 #verify_md5sum 1bbe2e2a5aa7d9fd5c55e60331f705f4 "$sdat2img"
 
+export required_tools="cp mv rm rmdir rsync sudo mount umount wget md5sum sha256sum unzip abootimg $sdat2img"
+for tool in $required_tools; do
+  if [ ! -e "$tool" ] && [ ! -e "$(which $tool)" ]; then
+    echo "Error: Could not find required tool $tool. Aborting."
+    exit 1
+  fi
+done
+
 
 function fetch_rom()
 {
@@ -36,6 +44,7 @@ function fetch_rom()
     wget -c --progress=dot:giga -O "$rom_local" "$rom_url"
   fi
 }
+
 
 function verify_image_integrity()
 {
@@ -55,6 +64,7 @@ function verify_image_integrity()
   echo "Verification successful."
 }
 
+
 function unpack_boot_partition()
 {
   echo "Extracting boot partition..."
@@ -71,6 +81,7 @@ function unpack_boot_partition()
   echo "Done."
 }
 
+
 function is_active_mountpoint()
 {
   local mountpoint="$1"
@@ -80,6 +91,7 @@ function is_active_mountpoint()
     return 1
   fi
 }
+
 
 function unpack_system_partition()
 {
@@ -111,6 +123,7 @@ function unpack_system_partition()
   echo "Done."
 }
 
+
 function mkimage()
 {
   set -e
@@ -140,6 +153,7 @@ function mkimage()
 
   set +e
 }
+
 
 function container_setup()
 {
