@@ -1,7 +1,7 @@
 
 # Derive container/image from this image
 export image_name="debian-base"
-export release="buster"
+export release="stable"
 export architecture="amd64"
 export base_image="docker.io/debian:${release}-slim"
 export image_tag="${release}-${architecture}"
@@ -25,15 +25,8 @@ export image_config="USER=${user} WORKDIR=/home/${user} CMD=/bin/bash"
 export dockerhub_repository="docker.io/matthiasbock/${image_name}:${image_tag}"
 
 
-
 function container_setup()
 {
-  #
-  # Set hostname
-  #
-  container_set_hostname $container_name "$hostname" \
-   || { echo "Error: Failed to set hostname. Aborting."; exit 1; }
-
   #
   # Configure bash
   #
@@ -66,7 +59,7 @@ function container_setup()
 
   # Enable SSL certificate verification
   for url in \
-   "$package_pool/main/d/dialog/dialog_1.3-20190211-1_amd64.deb" \
+   "$package_pool/main/d/dialog/dialog_1.3-20201126-1_amd64.deb" \
    "$package_pool/main/o/openssl/libssl1.1_1.1.1d-0%2Bdeb10u6_amd64.deb" \
    "$package_pool/main/o/openssl/openssl_1.1.1d-0%2Bdeb10u6_amd64.deb" \
    "$package_pool/main/c/ca-certificates/ca-certificates_20200601~deb10u2_all.deb" \
@@ -79,8 +72,13 @@ function container_setup()
   container_add_file $container_name "$sources_list" "/etc/apt/sources.list" \
    || { echo "Error: Failed to add apt sources.list required for further package installation. Aborting."; exit 1; }
   container_exec $container_name apt-get -q update
-  container_exec $container_name apt-get -q install --reinstall -y ca-certificates debian-*keyring ubuntu-*keyring \
+  # Clean up possible problems arising from the manual installation above
+  container_exec $container_name apt-get -q -f -y install
+  # Install keyrings to enable package verification
+  container_exec $container_name apt-get -q -y install --reinstall ca-certificates debian-*keyring ubuntu-*keyring \
    || { echo "Error: Failed to install keyrings. Aborting."; exit 1; }
+  # Make sure, we are using the latest stable version of all packages
+  container_exec $container_name apt-get -q -y upgrade
 
   # Select fastest package repository
   #$container_cli exec -it -u root $container_name bash -c "apt-get -q update && apt-get -q install -y netselect-apt && netselect-apt -s"
