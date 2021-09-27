@@ -47,6 +47,7 @@ container_start "$container_name" \
 container_setup
 
 # Done
-#container_minimize "$container_name"
-echo "Container creation complete: $container_name."
 $container_cli stop "$container_name"
+echo "Container $container_name created successfully."
+#container_size=$(container_get_size $container_name)
+#echo "Container size is $container_size."
