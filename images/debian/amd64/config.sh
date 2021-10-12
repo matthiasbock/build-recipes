@@ -34,7 +34,14 @@ function container_setup()
   container_create_user $container_name "$user" \
    || { echo "Error: Failed to create user. Aborting."; exit 1; }
 
-  # TODO: Add user to the list of sudoers
+  echo "Granting sudo priviledges to $user ..."
+  dstfile="/etc/sudoers"
+  container_add_file $container_name "$container_config_dir/sudoers" "$dstfile" \
+   || { echo "Error: Failed to copy sudoers config to container. Aborting."; exit 1; }
+  container_exec $container_name chown -R root.root "$dstfile" \
+   || { echo "Error: Failed to change ownership for $dstfile. Aborting."; exit 1; }
+  container_exec $container_name chmod 440 "$dstfile" \
+   || { echo "Error: Failed to change permissions for $dstfile. Aborting."; exit 1; }
 
   echo "Adding a .bashrc for root and $user ..."
   tmpfile=".bashrc"
