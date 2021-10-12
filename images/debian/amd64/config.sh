@@ -65,11 +65,17 @@ function container_setup()
   $container_cli exec -t $container_name mkdir -p /usr/share/man/man1/
 
   # Enable SSL certificate verification
+  version_libncursesw6="6.2+20201114-2"
+  version_dialog="1.3-20201126-1"
+  version_libssl="1.1.1k-1+deb11u1"
+  version_openssl="1.1.1k-1+deb11u1"
+  version_cacertificates="20210119"
   for url in \
-   "$package_pool/main/d/dialog/dialog_1.3-20201126-1_amd64.deb" \
-   "$package_pool/main/o/openssl/libssl1.1_1.1.1d-0%2Bdeb10u6_amd64.deb" \
-   "$package_pool/main/o/openssl/openssl_1.1.1d-0%2Bdeb10u6_amd64.deb" \
-   "$package_pool/main/c/ca-certificates/ca-certificates_20200601~deb10u2_all.deb" \
+   "$package_pool/main/n/ncurses/libncursesw6_${version_libncursesw6}_amd64.deb" \
+   "$package_pool/main/d/dialog/dialog_${version_dialog}_amd64.deb" \
+   "$package_pool/main/o/openssl/libssl1.1_${version_libssl}_amd64.deb" \
+   "$package_pool/main/o/openssl/openssl_${version_openssl}_amd64.deb" \
+   "$package_pool/main/c/ca-certificates/ca-certificates_${version_cacertificates}_all.deb" \
    ; do
      container_debian_install_package_from_url $container_name "$url" \
       || { echo "Error: Failed to install packages required for secure package installation. Aborting."; exit 1; }
