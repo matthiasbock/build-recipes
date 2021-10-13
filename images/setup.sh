@@ -1,6 +1,8 @@
 
 # Specify where to find common resources
-export common="../common"
+export project_root="$(realpath "$(dirname "$scriptpath")/../")"
+echo "Project root: $project_root"
+export common="$project_root/common"
 
 # The configuration for the container is provided in the form of a bash script.
 if [ "${container_config}" == "" ]; then

@@ -13,7 +13,6 @@ export container_networking=""
 #		--net $net --network-alias $container_name
 
 export user="runner"
-export hostname="debian"
 
 # This pool is used before package verification using GPG is available.
 # Use a HTTPS package pool here to at least have transport encryption.
@@ -103,10 +102,12 @@ function container_setup()
 
   # Enable sudo without password
   echo "Granting sudo priviledges to $user ..."
-  dstfile="/etc/sudoers"
-  container_add_file $container_name "$container_config_dir/sudoers" "$dstfile" \
+  srcfile="$common/sudoers.d/runner"
+  dstpath="/etc/sudoers.d"
+  dstfile="$dstpath/runner"
+  container_add_file $container_name "$srcfile" "$dstfile" \
    || { echo "Error: Failed to copy sudoers config to container. Aborting."; exit 1; }
-  container_exec $container_name chown -R root.root "$dstfile" \
+  container_exec $container_name chown root.root "$dstfile" \
    || { echo "Error: Failed to change ownership for $dstfile. Aborting."; exit 1; }
   container_exec $container_name chmod 440 "$dstfile" \
    || { echo "Error: Failed to change permissions for $dstfile. Aborting."; exit 1; }
