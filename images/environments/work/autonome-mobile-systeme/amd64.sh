@@ -6,7 +6,7 @@ export base_image="docker.io/matthiasbock/ubuntu-base:focal-${architecture}"
 export image_tag="${release}-${architecture}"
 export container_name="${image_name}-${image_tag}"
 
-export user="runner"
+source $common/user.sh
 
 # Commit the result as image
 export image_config="USER=${user} WORKDIR=/home/${user} CMD=/bin/bash"
