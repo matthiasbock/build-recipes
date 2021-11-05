@@ -18,11 +18,34 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build image and publish to Docker Hub
+  build-image:
+    name: Build image with build dependencies
     runs-on: ubuntu-latest
     env:
       config: environments/work/autonome-mobile-systeme/amd64.sh
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Build container
+        run: ${{ github.workspace }}/images/build.sh ${{ env.config }}
+
+      - name: Create image from container
+        run: ${{ github.workspace }}/images/commit.sh ${{ env.config }}
+
+      - name: Publish image on Docker Hub
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+        run: ${{ github.workspace }}/images/publish-dockerhub.sh ${{ env.config }}
+
+  precompile-playerstage:
+    name: Precompile The Player Project
+    runs-on: ubuntu-latest
+    needs: build-image
+    env:
+      config: environments/work/autonome-mobile-systeme/amd64-precompile.sh
     steps:
       - uses: actions/checkout@v2
         with:
