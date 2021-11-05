@@ -1,13 +1,13 @@
 
-name: autonome-mobile-systeme
+name: autonome-mobile-systeme-precompiled
 
 on:
   push:
     paths:
       - '!.**'
       - '!**'
-      - '.github/workflows/autonome-mobile-systeme.yml'
-      - 'images/environments/work/autonome-mobile-systeme/amd64.sh'
+      - '.github/workflows/autonome-mobile-systeme-precompiled.yml'
+      - 'images/environments/work/autonome-mobile-systeme/amd64-precompiled.sh'
       # - 'common/**'
       # - 'images/setup.sh'
       # - 'images/build.sh'
@@ -18,11 +18,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-image:
-    name: Compile image with AMS dependencies
+  precompile-playerstage:
+    name: Precompile The Player Project
     runs-on: ubuntu-latest
     env:
-      config: environments/work/autonome-mobile-systeme/amd64.sh
+      config: environments/work/autonome-mobile-systeme/amd64-precompiled.sh
     steps:
       - uses: actions/checkout@v2
         with:
