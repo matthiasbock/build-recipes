@@ -7,7 +7,7 @@ on:
       - '!.**'
       - '!**'
       - '.github/workflows/debian-base.yml'
-      - 'images/debian/**'
+      - 'images/systems/debian/**'
       # - 'common/**'
       # - 'images/setup.sh'
       # - 'images/build.sh'
@@ -23,7 +23,7 @@ jobs:
     name: Build image and publish on Docker Hub
     runs-on: ubuntu-latest
     env:
-      config: debian/amd64/config.sh
+      config: systems/debian/amd64.sh
     steps:
       - uses: actions/checkout@v2
         with:
