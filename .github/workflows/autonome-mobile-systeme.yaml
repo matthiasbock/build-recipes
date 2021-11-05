@@ -22,7 +22,7 @@ jobs:
     name: Build image and publish to Docker Hub
     runs-on: ubuntu-latest
     env:
-      config: environments/work/autonome-mobile-systeme/config.sh
+      config: environments/work/autonome-mobile-systeme/amd64.sh
     steps:
       - uses: actions/checkout@v2
         with:
