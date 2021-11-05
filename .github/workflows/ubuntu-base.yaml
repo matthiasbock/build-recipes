@@ -1,0 +1,42 @@
+
+name: ubuntu-base
+
+on:
+  push:
+    paths:
+      - '!.**'
+      - '!**'
+      - '.github/workflows/ubuntu-base.yml'
+      - 'images/systems/ubuntu/**'
+      # - 'common/**'
+      # - 'images/setup.sh'
+      # - 'images/build.sh'
+      # - 'images/commit.sh'
+      # - 'images/publish-dockerhub.sh'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    name: Build image and publish on Docker Hub
+    runs-on: ubuntu-latest
+    env:
+      config: systems/ubuntu/amd64.sh
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Build container
+        run: ${{ github.workspace }}/images/build.sh ${{ env.config }}
+
+      - name: Create image from container
+        run: ${{ github.workspace }}/images/commit.sh ${{ env.config }}
+
+      - name: Publish image on Docker Hub
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+        run: ${{ github.workspace }}/images/publish-dockerhub.sh ${{ env.config }}
