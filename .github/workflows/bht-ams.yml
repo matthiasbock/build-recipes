@@ -6,7 +6,7 @@ on:
     paths:
       - '!.**'
       - '!**'
-      - '.github/workflows/autonome-mobile-systeme.yml'
+      - '.github/workflows/bht-ams.yml'
       - 'images/environments/work/autonome-mobile-systeme/amd64.sh'
       # - 'common/**'
       # - 'images/setup.sh'

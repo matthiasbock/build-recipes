@@ -6,7 +6,7 @@ on:
     paths:
       - '!.**'
       - '!**'
-      - '.github/workflows/autonome-mobile-systeme-precompiled.yml'
+      - '.github/workflows/bht-ams-precompiled.yml'
       - 'images/environments/work/autonome-mobile-systeme/amd64-precompiled.sh'
       # - 'common/**'
       # - 'images/setup.sh'
