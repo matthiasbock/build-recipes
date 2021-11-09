@@ -1,4 +1,13 @@
 
+*.out
+*.o
+*.a
+*.so
+*.bin
+*.elf
+*.map
+*.log
+
 secrets*
 secrets.*
 SECRETS*
@@ -9,4 +18,3 @@ SECRETS.*
 *.bck
 .goutputstream*
 .~lock*
-
