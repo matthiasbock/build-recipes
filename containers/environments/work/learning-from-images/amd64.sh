@@ -3,7 +3,7 @@ export image_name="learning-from-images"
 export release="debian"
 export architecture="amd64"
 export base_image="docker.io/matthiasbock/debian-base:stable-${architecture}"
-export image_tag="${release}-${architecture}"
+export image_tag="latest"
 export container_name="${image_name}-${image_tag}"
 
 source $project_root/containers/user.sh
