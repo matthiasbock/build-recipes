@@ -41,6 +41,7 @@ function container_setup()
   # Configure APT
   echo "Configuring APT ..."
 
+  container_add_file $container_name $common/apt/apt.conf /etc/apt/apt.conf
 
   container_exec $container_name echo 'APT::Get::Install-Recommends "false"; APT::Get::Install-Suggests "false";' >> /etc/apt/apt.conf
   container_exec $container_name apt-get -q update

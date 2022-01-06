@@ -51,6 +51,8 @@ function container_setup()
   #
   echo "Configuring APT ..."
 
+  container_add_file $container_name $common/apt/apt.conf /etc/apt/apt.conf
+
   # Workaround for installation problems (e.g. with openjdk-11-jdk)
   $container_cli exec -t $container_name mkdir -p /usr/share/man/man1/
 
