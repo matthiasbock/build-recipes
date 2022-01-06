@@ -35,7 +35,7 @@ function container_setup()
 
   echo "Adding a .bashrc for root and $user ..."
   tmpfile=".bashrc"
-  cat $common/shell/*.bashrc > "$tmpfile"
+  cat $common/config/shell/*.bashrc > "$tmpfile"
   container_add_file $container_name "$tmpfile" "/root/" \
    || { echo "Error: Failed to add bashrc for user root. Aborting."; exit 1; }
   container_exec $container_name chown -R root.root /root/ \
@@ -51,7 +51,7 @@ function container_setup()
   #
   echo "Configuring APT ..."
 
-  container_add_file $container_name $common/apt/apt.conf /etc/apt/apt.conf
+  container_add_file $container_name $common/config/apt/apt.conf /etc/apt/apt.conf
 
   # Workaround for installation problems (e.g. with openjdk-11-jdk)
   $container_cli exec -t $container_name mkdir -p /usr/share/man/man1/
@@ -104,7 +104,7 @@ function container_setup()
 
   # Enable sudo without password
   echo "Granting sudo priviledges to $user ..."
-  srcfile="$common/sudoers.d/runner"
+  srcfile="$common/config/sudoers.d/runner"
   dstpath="/etc/sudoers.d"
   dstfile="$dstpath/runner"
   container_add_file $container_name "$srcfile" "$dstfile" \
