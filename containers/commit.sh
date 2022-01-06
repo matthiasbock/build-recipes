@@ -23,7 +23,7 @@ source "setup.sh" \
  || { echo "Error: Failed to load setup script. Aborting."; exit 1; }
 
 
-if [ $(type -t pre_commit_hook) == "function" ]; then
+if [ "$(type -t pre_commit_hook)" == "function" ]; then
   pre_commit_hook
 fi
 
