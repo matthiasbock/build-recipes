@@ -17,7 +17,7 @@ export user="runner"
 # This pool is used before package verification using GPG is available.
 # Use a HTTPS package pool here to at least have transport encryption.
 export package_pool="https://ftp.gwdg.de/pub/linux/debian/debian/pool/"
-export sources_list="$common/sources.list.d/$release.list"
+export sources_list="$common/config/apt/sources.list.d/$release.list"
 
 # Commit the result as image
 export image_config="USER=${user} WORKDIR=/home/${user} CMD=/bin/bash"

@@ -25,7 +25,7 @@ function container_setup()
 {
   # Add Microsoft's package repository sources.list
   echo "Configuring Microsoft package repositories ..."
-  srcfile="$common/sources.list.d/microsoft.list"
+  srcfile="$common/config/apt/sources.list.d/microsoft.list"
   dstpath="/etc/apt/sources.list.d"
   dstfile="$dstpath/microsoft.list"
   container_add_file $container_name "$srcfile" "$dstfile" \
