@@ -1,0 +1,32 @@
+
+SUBSYSTEM=="scsi", ACTION=="add", ATTRS{model}=="DVDRAM GH22NS40*", DEVPATH=="*ata7/host6/target6*", SYMLINK+="drive0"
+SUBSYSTEM=="scsi", ACTION=="add", ATTRS{model}=="DVDRAM GH22NS40*", DEVPATH=="*ata5/host4/target4*", SYMLINK+="drive1"
+SUBSYSTEM=="scsi", ACTION=="add", ATTRS{model}=="DVDRAM GH24NSC0*", SYMLINK+="drive2"
+SUBSYSTEM=="scsi", ACTION=="add", ATTRS{model}=="DVD+-RW AW-Q160S", SYMLINK+="drive3"
+SUBSYSTEM=="scsi", ACTION=="add", ATTRS{model}=="BD-RE  BH40N*", SYMLINK+="drive4"
+
+drive0:
+/dev/sr4
+...ata7/host6/target6...
+ID_SERIAL=HL-DT-ST_DVDRAM_GH22NS40_C1CE225C5777
+
+drive1:
+/dev/sr2
+...ata5/host4/target4...
+ID_SERIAL=HL-DT-ST_DVDRAM_GH22NS40_BD20100AEB86
+
+drive2:
+/dev/sr0
+ID_MODEL=HL-DT-ST_DVDRAM_GH24NSC0
+
+drive3:
+/dev/sr3
+ID_MODEL=SONY_DVD+_-RW_AW-Q160S
+# tray won't open
+
+drive4:
+/dev/sr1
+ID_MODEL=HL-DT-ST_BD-RE_BH40N
+
+drive5:
+?
