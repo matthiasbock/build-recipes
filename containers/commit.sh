@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Change to the folder containing this script
 export initial_pwd="$(pwd)"
 export scriptpath="$(pwd)"
