@@ -21,12 +21,12 @@ function container_setup()
 
   # Build player
   container_exec $container_name sudo -u $user git clone https://github.com/playerproject/player.git /home/$user/player
-  container_exec $container_name sudo -u $user bash -c "cd /home/$user/player; git checkout f0109df; mkdir build; cd build; cmake ../ -Wno-dev; make -j4; make; sudo make install; make clean; sudo ldconfig" \
+  container_exec $container_name sudo -u $user bash -c "cd /home/$user/player && git checkout f0109df && mkdir build && cd build && cmake ../ -Wno-dev && make -j4 && make && sudo make install && make clean && sudo ldconfig" \
    || { echo "Error: Failed to compile Player. Aborting."; exit 1; }
 
   # Build stage
   container_exec $container_name sudo -u $user git clone http://github.com/rtv/Stage.git /home/$user/stage
-  container_exec $container_name sudo -u $user bash -c "cd /home/$user/stage; git checkout 0c85412; mkdir build; cd build; cmake ../ -Wno-dev; make -j4; make; sudo make install; make clean; sudo ldconfig" \
+  container_exec $container_name sudo -u $user bash -c "cd /home/$user/stage; git checkout 0c85412 && mkdir build && cd build && cmake ../ -Wno-dev && make -j4 && make && sudo make install && make clean && sudo ldconfig" \
    || { echo "Error: Failed to compile Stage. Aborting."; exit 1; }
 
   # Clean up
