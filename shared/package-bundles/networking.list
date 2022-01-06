@@ -1,5 +1,7 @@
 net-tools
 bridge-utils
+wireless-tools
+iw
 inetutils-traceroute
 nmap
 wget
