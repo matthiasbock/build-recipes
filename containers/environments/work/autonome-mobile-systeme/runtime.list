@@ -1,5 +1,5 @@
-libopencv-dev libgsl-dev libgsm1 libopencv-highgui-dev libxmu-dev swig libltdl-dev libgeos++-dev libpng-dev libncurses-dev \
-libboost1.67-dev libboost-thread1.67-dev libboost-signals1.67-dev libboost-program-options1.67-dev libboost-system1.67-dev \
-libgnomecanvas2-dev libgnomecanvasmm-2.6-dev \
-freeglut3 freeglut3-dev \
+libopencv-dev libgsl-dev libgsm1 libopencv-highgui-dev libxmu-dev swig libltdl-dev libgeos++-dev libpng-dev libncurses-dev
+libboost1.67-dev libboost-thread1.67-dev libboost-signals1.67-dev libboost-program-options1.67-dev libboost-system1.67-dev
+libgnomecanvas2-dev libgnomecanvasmm-2.6-dev
+freeglut3 freeglut3-dev
 libfltk1.3 libfltk1.3-dev libgtk2.0-dev libnewmat10-dev liblog4cpp5-dev
