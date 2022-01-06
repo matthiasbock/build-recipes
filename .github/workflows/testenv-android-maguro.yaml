@@ -7,12 +7,12 @@ on:
       - '!.**'
       - '!**'
       - '.github/workflows/testenv-android-maguro.yml'
-      - 'images/test-environments/android/maguro/**'
+      - 'containers/test-environments/android/maguro/**'
       # - 'common/**'
-      # - 'images/setup.sh'
-      # - 'images/build.sh'
-      # - 'images/commit.sh'
-      # - 'images/publish-dockerhub.sh'
+      # - 'containers/setup.sh'
+      # - 'containers/build.sh'
+      # - 'containers/commit.sh'
+      # - 'containers/publish-dockerhub.sh'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
     name: Build image and publish
     runs-on: ubuntu-latest
     env:
-      workdir: ${{ github.workspace }}/images/test-environments/android/maguro/cyanogenmod-13.0
+      workdir: ${{ github.workspace }}/containers/test-environments/android/maguro/cyanogenmod-13.0
       config: test-environments/android/maguro/cyanogenmod-13.0/config.sh
     steps:
       - uses: actions/checkout@v2
@@ -52,4 +52,4 @@ jobs:
         env:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-        run: ${{ github.workspace }}/images/publish-dockerhub.sh ${{ env.config }}
+        run: ${{ github.workspace }}/containers/publish-dockerhub.sh ${{ env.config }}
