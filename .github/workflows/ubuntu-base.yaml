@@ -23,7 +23,7 @@ jobs:
     name: Build image and publish on Docker Hub
     runs-on: ubuntu-latest
     env:
-      config: systems/ubuntu/focal.sh
+      config: systems/ubuntu/amd64/focal.sh
     steps:
       - uses: actions/checkout@v2
         with:
