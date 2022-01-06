@@ -86,23 +86,28 @@ function container_setup() {
   # Comment the following line when using systemd-nspawn:
   for d in proc sys dev dev/pts; do sudo mount -v --bind /$d $RASPIROOT/$d; done
 
+  # Workaround for key problems:
+  # for key in 5C808C2B65558117 112695A0E562B32A 54404762BBB6E853 648ACFD622F3D138 0E98404D386FA1D9 DCC9EFBF77E11517 605C66F00D6C9793; do \
+  #   apt-key adv --keyserver pgp.mit.edu --recv-keys $key; \
+  # done
+
+  $run apt-get -q update
+  $run apt-get -q install -y \
+    ca-certificates \
+    $(cat $common/package-bundles/keyrings.list) \
+    $(cat $common/package-bundles/raspberrypi.list)
   $run apt-get -q update
   $run apt-get -q install -y dialog locales
   cp -av $common/config/locale.gen $RASPIROOT/etc/
   $run locale-gen
 
-  $run apt-get -q purge -y initamfs-tools*
-  # Installing those doesn't work:
-  $run apt-mark hold initramfs-tools* #linux-image*
-#    raspi-firmware \
   $run apt-get -q install -y \
-    bash bash-completion mc vim \
-    $(cat $common/package-bundles/keyrings.list) \
     $(cat $common/package-bundles/debian-essentials.list) \
     $(cat $common/package-bundles/console-tools.list) \
     $(cat $common/package-bundles/networking.list) \
     $(cat $common/package-bundles/python3.list) \
     docker.io podman
+
   $run systemctl disable systemd-resolved
   $run systemctl enable dnsmasq
   $run apt-get -q autoremove -y
