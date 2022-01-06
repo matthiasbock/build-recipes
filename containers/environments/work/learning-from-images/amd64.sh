@@ -17,7 +17,10 @@ function container_setup()
 {
   # Install software
   container_exec $container_name apt-get -q update
-  container_exec $container_name apt-get -q install --no-install-recommends --no-install-suggests -y python3-{pip,torch,opencv,sklearn,matplotlib,numpy} idle3 wget
+  container_exec $container_name apt-get -q install --no-install-recommends --no-install-suggests -y \
+    python3-{pip,torch,opencv,sklearn,matplotlib,numpy,multiprocess,tk} idle3 \
+    graphviz libgl1-mesa-glx libhdf5-dev openmpi-bin \
+    git gcc g++ bzip2 wget mc
 
   # TODO
   container_exec $container_name sudo -u $user wget --progress=dot:giga https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh -O /home/$user/Anaconda3-2021.05-Linux-x86_64.sh
