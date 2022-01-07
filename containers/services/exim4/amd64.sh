@@ -8,7 +8,7 @@ export image_tag="latest"
 export container_name="${image_name}-${image_tag}"
 
 # Commit the result as image
-export image_config="USER=root WORKDIR=/ ENTRYPOINT=['/etc/init.d/exim4', 'start', ';', '/bin/bash']"
+export image_config="USER=root WORKDIR=/ CMD=/bin/bash"
 export dockerhub_repository="docker.io/matthiasbock/${image_name}:${image_tag}"
 export skip_container_creation=0
 export skip_container_start=0
