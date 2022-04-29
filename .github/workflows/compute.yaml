@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       workdir: ${{ github.workspace }}/containers/environments/compute/base
-      image_name: compute-base-amd64
+      image_tag: compute:base-amd64
       config: environments/compute/base/config.sh
     steps:
       - name: git checkout
@@ -29,7 +29,7 @@ jobs:
       - name: Build image from Dockerfile
         run: |
           cd "${{ env.workdir }}"
-          podman build -t ${{ env.image_name }} .
+          podman build -t ${{ env.image_tag }} .
 
       - name: Publish image on Docker Hub
         env:
