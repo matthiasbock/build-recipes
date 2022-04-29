@@ -1,0 +1,38 @@
+
+name: compute
+
+on:
+  push:
+    paths:
+      - '!.**'
+      - '!**'
+      - '.github/workflows/compute.yml'
+      - 'containers/environments/compute/*'
+      - 'containers/environments/compute/base/*'
+
+  workflow_dispatch:
+
+jobs:
+  build-image:
+    name: Build image
+    runs-on: ubuntu-latest
+    env:
+      workdir: ${{ github.workspace }}/containers/environments/compute/base
+      image_name: compute-base-amd64
+      config: environments/compute/base/config.sh
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Build image from Dockerfile
+        run: |
+          cd "${{ env.workdir }}"
+          podman build -t ${{ env.image_name }} .
+
+      - name: Publish image on Docker Hub
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+        run: ${{ github.workspace }}/containers/publish-dockerhub.sh ${{ env.config }}
