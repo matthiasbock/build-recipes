@@ -1,14 +1,14 @@
 
-name: compute-nvidia
+name: compute-nvidia-headless
 
 on:
   push:
     paths:
       - '!.**'
       - '!**'
-      - '.github/workflows/compute-nvidia.yml'
+      - '.github/workflows/compute-nvidia-headless.yml'
       - 'containers/environments/compute/*'
-      - 'containers/environments/compute/nvidia/*'
+      - 'containers/environments/compute/nvidia-headless/*'
 
   workflow_dispatch:
 
@@ -17,8 +17,8 @@ jobs:
     name: Build image
     runs-on: ubuntu-latest
     env:
-      workdir: ${{ github.workspace }}/containers/environments/compute/nvidia
-      image_tag: compute:nvidia-amd64
+      workdir: ${{ github.workspace }}/containers/environments/compute/nvidia-headless
+      image_tag: compute:nvidia-headless
       config: environments/compute/nvidia/config.sh
     steps:
       - name: git checkout

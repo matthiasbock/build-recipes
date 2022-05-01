@@ -1,5 +1,5 @@
 
-FROM docker.io/matthiasbock/compute:base-amd64
+FROM docker.io/matthiasbock/compute:compile
 
 RUN \
     export DEBIAN_FRONTEND=noninteractive && \
