@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       workdir: ${{ github.workspace }}/containers/environments/compute/base
-      image_tag: compute:base-amd64
+      image_tag: compute:base
       config: environments/compute/base/config.sh
     steps:
       - name: git checkout
