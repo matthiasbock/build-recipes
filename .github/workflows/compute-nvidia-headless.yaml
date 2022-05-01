@@ -19,7 +19,7 @@ jobs:
     env:
       workdir: ${{ github.workspace }}/containers/environments/compute/nvidia-headless
       image_tag: compute:nvidia-headless
-      config: environments/compute/nvidia/config.sh
+      config: environments/compute/nvidia-headless/config.sh
     steps:
       - name: git checkout
         uses: actions/checkout@v2
