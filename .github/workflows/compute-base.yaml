@@ -1,5 +1,5 @@
 
-name: compute
+name: compute-base
 
 on:
   push:
