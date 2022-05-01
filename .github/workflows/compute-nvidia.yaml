@@ -1,14 +1,14 @@
 
-name: compute
+name: compute-nvidia
 
 on:
   push:
     paths:
       - '!.**'
       - '!**'
-      - '.github/workflows/compute-base.yml'
+      - '.github/workflows/compute-nvidia.yml'
       - 'containers/environments/compute/*'
-      - 'containers/environments/compute/base/*'
+      - 'containers/environments/compute/nvidia/*'
 
   workflow_dispatch:
 
@@ -17,9 +17,9 @@ jobs:
     name: Build image
     runs-on: ubuntu-latest
     env:
-      workdir: ${{ github.workspace }}/containers/environments/compute/base
-      image_tag: compute:base-amd64
-      config: environments/compute/base/config.sh
+      workdir: ${{ github.workspace }}/containers/environments/compute/nvidia
+      image_tag: compute:nvidia-amd64
+      config: environments/compute/nvidia/config.sh
     steps:
       - name: git checkout
         uses: actions/checkout@v2
