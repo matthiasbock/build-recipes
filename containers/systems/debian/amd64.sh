@@ -2,6 +2,7 @@
 # Derive container/image from this image
 export image_name="debian-base"
 export release="stable"
+export release_name="bullseye"
 export architecture="amd64"
 export base_image="docker.io/debian:${release}-slim"
 export image_tag="${release}-${architecture}"
@@ -9,9 +10,6 @@ export container_name="${image_name}-${image_tag}"
 
 # Container/image parameters
 export container_networking=""
-#   --pod "$pod"
-#		--net $net --network-alias $container_name
-
 export user="runner"
 
 # This pool is used before package verification using GPG is available.
@@ -50,27 +48,14 @@ function container_setup()
   # Configure APT
   #
   echo "Configuring APT ..."
-
   container_add_file $container_name $common/config/apt/apt.conf /etc/apt/apt.conf
 
   # Workaround for installation problems (e.g. with openjdk-11-jdk)
   $container_cli exec -t $container_name mkdir -p /usr/share/man/man1/
 
-  # Enable SSL certificate verification
-  version_libncursesw6="6.2+20201114-2"
-  version_dialog="1.3-20201126-1"
-  version_libssl="1.1.1k-1+deb11u1"
-  version_openssl="1.1.1k-1+deb11u1"
-  version_cacertificates="20210119"
-  for url in \
-   "$package_pool/main/n/ncurses/libncursesw6_${version_libncursesw6}_amd64.deb" \
-   "$package_pool/main/d/dialog/dialog_${version_dialog}_amd64.deb" \
-   "$package_pool/main/o/openssl/libssl1.1_${version_libssl}_amd64.deb" \
-   "$package_pool/main/o/openssl/openssl_${version_openssl}_amd64.deb" \
-   "$package_pool/main/c/ca-certificates/ca-certificates_${version_cacertificates}_all.deb" \
-   ; do
-     container_debian_install_package_from_url $container_name "$url" \
-      || { echo "Error: Failed to install packages required for secure package installation. Aborting."; exit 1; }
+  # Manually facilitate SSL certificate verification
+  for pkg in libncursesw6 dialog libssl1.1 openssl ca-certificates; do
+    container_debian_install_manually $container_name $release_name $architecture $pkg
   done
 
   # Bootstrap using a trustworthy HTTPS package repository
