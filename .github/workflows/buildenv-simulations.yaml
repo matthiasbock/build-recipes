@@ -27,7 +27,7 @@ jobs:
         run: |
           cd "${{ env.workdir }}" && \
           source config.sh && \
-          podman build --platform ${architecture} -t ${image_name} .
+          podman build --platform ${architecture} -t ${image_name}:${image_tag} .
 
       - name: Publish image on Docker Hub
         env:
