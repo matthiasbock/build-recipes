@@ -1,0 +1,36 @@
+
+name: buildenv-opencarp-meshalyzer
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '!.**'
+      - '!**'
+      - '.github/workflows/buildenv-opencarp-meshalyzer.yml'
+      - 'containers/environments/build/opencarp/meshalyzer/*'
+
+jobs:
+  build-image:
+    name: Build image
+    runs-on: ubuntu-latest
+    env:
+      workdir: ${{ github.workspace }}/containers/environments/build/opencarp/meshalyzer
+      config: environments/build/opencarp/meshalyzer/config.sh
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Build image from Dockerfile
+        run: |
+          cd "${{ env.workdir }}" && \
+          source config.sh && \
+          podman build --platform ${architecture} -t ${image_name}:${image_tag} .
+
+      - name: Publish image on Docker Hub
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+        run: ${{ github.workspace }}/containers/publish-dockerhub.sh ${{ env.config }}
