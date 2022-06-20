@@ -1,13 +1,14 @@
 
 FROM docker.io/matthiasbock/debian-base:stable-amd64
 
+USER runner
+
 ENV DEBIAN_FRONTEND=noninteractive
 RUN sudo apt-get update -q && \
-    sudo apt-get -q install -y libgl1 libxt6 qt5dxcb-plugin && \
+    sudo apt-get -q install -y libgl1 libxt6 qt5dxcb-plugin libgomp1 libnss3 libasound2 && \
+    sudo apt-get -q purge -y systemd && \
+    sudo apt-get -q autoremove -y && \
     sudo apt-get clean
-
-USER runner
-WORKDIR /home/runner
 
 ENV RELEASE_URL=https://github.com/CemrgAppDevelopers/CemrgApp/releases/download/v2.2/CemrgApp-Linux-v2.2.zip
 ENV RELEASE_ZIP=/home/runner/CemrgApp-Linux-v2.2.zip
@@ -28,5 +29,6 @@ RUN sudo find /lost+found /run /tmp /root/.bash_history /home/*/.bash_history \
      /var/log /var/mail /var/run /var/spool /var/tmp \
      -type f -exec rm -f {} \; || true
 
-ENV DISPLAY=unix:0.0
-#ENTRYPOINT ["/home/runner/CemrgApp-Linux/bin/CemrgApp"]
+ENV DISPLAY="unix:0.0"
+WORKDIR /home/runner/CemrgApp-Linux/bin
+CMD /home/runner/CemrgApp-Linux/bin/CemrgApp
